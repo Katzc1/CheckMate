@@ -1,6 +1,6 @@
-package Pieces;
 
-public class Kight {
+
+public class ClientHandler {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

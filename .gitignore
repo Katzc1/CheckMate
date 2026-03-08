@@ -7,3 +7,15 @@
 /Board.class
 /board.class
 /ChessBoard.class
+/Client.class
+/ClientHandler.class
+/GameSession.class
+/Lobby.class
+/Move.class
+/OnlinePlayer.class
+/Server.class
+/Bishop.class
+/Kight.class
+/King.class
+/Queen.class
+/Rook.class

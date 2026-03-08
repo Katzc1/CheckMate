@@ -1,6 +1,6 @@
-package Network;
 
-public class Client {
+
+public class Kight {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
