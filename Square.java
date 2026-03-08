@@ -23,6 +23,18 @@ public boolean isOccupied;
 
 public Piece onSquare;
 
+
+public Square(int row, int column) {
+
+this.rank = row;
+
+this.file = column;
+}
+
+
+
+
+
 //Constructor for when the square is empty (technically dont need the bool in this case
 
 //But kept for clarity
