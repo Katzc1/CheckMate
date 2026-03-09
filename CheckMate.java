@@ -1,7 +1,5 @@
-// Author: Alby Garcia, Camerun Katz, Kia
+// Author: Alby Garcia, Cameron Katz, and Kai Weinstein
 // Description: 
-
-import javax.swing.JFrame;
 
 public class CheckMate {
     public static void main(String[] args) {
