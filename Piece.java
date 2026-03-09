@@ -1,8 +1,9 @@
 //This class has been made abstract because there isn't a use case for a generic "Piece"
 
 //The pieces on the board will always be child pieces such as pawns and rooks
+import java.io.Serializable;
 
-public abstract class Piece {
+public abstract class Piece implements Serializable {
 
 //We define attributes every piece should have, and set the default color of the piece to Black
 

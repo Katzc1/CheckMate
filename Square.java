@@ -1,6 +1,9 @@
 
-public class Square {
+import java.io.Serializable;
 
+@SuppressWarnings("serial")
+public class Square implements Serializable {
+	
 //Rank and file: coordinates as to where the square is
 
 public int rank;

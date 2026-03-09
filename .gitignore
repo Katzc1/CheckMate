@@ -20,3 +20,5 @@
 /Queen.class
 /Rook.class
 /Knight.class
+/NetworkManager.class
+/ConnectionUI.class

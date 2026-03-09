@@ -1,10 +1,12 @@
+import java.io.Serializable;
 
+public class Move implements Serializable {
+    public int startRow, startCol, endRow, endCol;
 
-public class Move {
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
+    public Move(int startRow, int startCol, int endRow, int endCol) {
+        this.startRow = startRow;
+        this.startCol = startCol;
+        this.endRow = endRow;
+        this.endCol = endCol;
+    }
 }
