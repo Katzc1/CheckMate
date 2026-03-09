@@ -26,8 +26,8 @@ public class GUI extends JFrame {
     }
 
     private void drawBoard() {
-        for(int row = 1; row < 9; row++) {
-            for(int col = 1; col < 9; col++) {
+        for(int row = 0; row < 8; row++) {
+            for(int col = 0; col < 8; col++) {
                 JButton square = new JButton();
                 
                 //find color
