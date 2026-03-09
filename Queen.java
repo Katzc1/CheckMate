@@ -1,22 +1,6 @@
 public class Queen extends Piece {
 
-//PLACEHOLDER: PLEASE DELETE LATER!!!!!!
 
-//
-
-//
-
-//
-
-Square[][] board = new Square[8][8];
-
-//
-
-//
-
-//
-
-//DELETE TS!!!!!!!!!!!!
 
 public Queen(String col, Square pos) {
 
@@ -80,7 +64,7 @@ for(int i = startFile; i < endFile; i++) {
 
 //Iterate through board coordinates (staying on the same rank, and iterating files)
 
-if(board[Location.getRank()][i].isOccupied) {
+if(ChessBoard.getBoard()[Location.getRank()][i].isOccupied) {
 
 //If any of the squares IN BETWEEN are occupied, then the path is not clear.
 
@@ -104,7 +88,7 @@ int endRank = Math.max(Location.getRank(), destination.getRank());
 
 for(int i = startRank; i < endRank; i++) {
 
-if(board[i][Location.getFile()].isOccupied) {
+if(ChessBoard.getBoard()[i][Location.getFile()].isOccupied) {
 
 return false;
 

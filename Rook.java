@@ -1,23 +1,6 @@
 public class Rook extends Piece {
 
-//PLACEHOLDER: PLEASE DELETE LATER!!!!!!
 
-//
-
-//
-
-//
-
-	Square[][] board = new Square[8][8];
-	
-	//
-	
-	//
-	
-	//
-	
-	//DELETE TS!!!!!!!!!!!!
-	
 	public Rook(String col, Square pos) {
 	
 	super(col, 8, pos);
@@ -78,7 +61,7 @@ public class Rook extends Piece {
 	
 	//Iterate through board coordinates (staying on the same rank, and iterating files)
 	
-	if(board[Location.getRank()][i].isOccupied) {
+	if(ChessBoard.getBoard()[Location.getRank()][i].isOccupied) {
 	
 	//If any of the squares IN BETWEEN are occupied, then the path is not clear.
 	
@@ -102,7 +85,7 @@ public class Rook extends Piece {
 	
 	for(int i = startRank; i < endRank; i++) {
 	
-	if(board[i][Location.getFile()].isOccupied) {
+	if(ChessBoard.getBoard()[i][Location.getFile()].isOccupied) {
 	
 	return false;
 	

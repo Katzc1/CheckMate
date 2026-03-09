@@ -4,7 +4,7 @@ import java.awt.*;
 
 public class ChessBoard extends JFrame{
 
-    private Square[][] board;
+    private static Square[][] board;
 
     public ChessBoard() {
 
@@ -19,11 +19,11 @@ public class ChessBoard extends JFrame{
         }
     }
 
-    public Square getSquare(int row, int col) {
+    public static Square getSquare(int row, int col) {
         return board[row][col];
     }
 
-    public Square[][] getBoard() {
+    public static Square[][] getBoard() {
         return board;
     }
 }

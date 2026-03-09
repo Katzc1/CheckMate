@@ -1,22 +1,5 @@
 public class Pawn extends Piece {
 
-//PLACEHOLDER: PLEASE DELETE LATER!!!!!!
-
-//
-
-//
-
-//
-
-Square[][] board = new Square[8][8];
-
-//
-
-//
-
-//
-
-//DELETE TS!!!!!!!!!!!!
 
 public Pawn(String col, Square pos) {
 

@@ -1,22 +1,5 @@
 public class King extends Piece {
 
-//PLACEHOLDER: PLEASE DELETE LATER!!!!!!
-
-//
-
-//
-
-//
-
-Square[][] board = new Square[8][8];
-
-//
-
-//
-
-//
-
-//DELETE TS!!!!!!!!!!!!
 
 public King(String col, Square pos) {
 
