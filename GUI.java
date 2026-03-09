@@ -26,8 +26,8 @@ public class GUI extends JFrame {
     }
 
     private void drawBoard() {
-        for(int row = 0; row < 8; row++) {
-            for(int col = 0; col < 8; col++) {
+        for(int row = 1; row < 9; row++) {
+            for(int col = 1; col < 9; col++) {
                 JButton square = new JButton();
                 
                 //find color
@@ -53,7 +53,6 @@ public class GUI extends JFrame {
         if (!myTurn) return; 
 
         if (startRow == -1) {
-            // First click: Select a piece
             startRow = row;
             startCol = col;
             squares[row][col].setBorderPainted(true);
@@ -80,7 +79,6 @@ public class GUI extends JFrame {
             try {
                 while (true) {
                     Move incoming = nm.receiveMove();
-                    // Use SwingUtilities to ensure UI updates happen on the correct thread
                     SwingUtilities.invokeLater(() -> {
                         applyMoveLocally(incoming);
                         myTurn = true; // IT IS NOW YOUR TURN
@@ -93,7 +91,6 @@ public class GUI extends JFrame {
     }
 
     private void applyMoveLocally(Move m) {
-        // [cite: 1] - Fixed: Updating the logic board as well as the UI
         Square start = board.getSquare(m.startRow, m.startCol);
         Square end = board.getSquare(m.endRow, m.endCol);
         
@@ -108,5 +105,21 @@ public class GUI extends JFrame {
         squares[m.endRow][m.endCol].setText(squares[m.startRow][m.startCol].getText());
         squares[m.startRow][m.startCol].setText("");
         repaint();
+    }
+    
+    private void updateSquareVisuals() {
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+                Square sq = ChessBoard.getSquare(r, c);
+                if (sq.isOccupied) {
+                    Piece p = sq.getPieceOnSquare();
+                    // Assumes images are named like "WhitePawn.png"
+                    String imgName = p.getColor() + p.getClass().getSimpleName() + ".png";
+                    squares[r][c].setIcon(new ImageIcon("res/" + imgName));
+                } else {
+                    squares[r][c].setIcon(null);
+                }
+            }
+        }
     }
 }
