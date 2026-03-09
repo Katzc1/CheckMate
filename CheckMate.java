@@ -8,4 +8,4 @@ public class CheckMate {
         NetworkManager nm = new NetworkManager();
         new ConnectionUI(nm);
     }
-}	
+}

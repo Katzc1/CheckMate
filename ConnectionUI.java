@@ -39,7 +39,11 @@ public class ConnectionUI extends JFrame {
     }
 
     private void startGame(boolean isWhite) {
-        this.dispose();
-        ChessBoard board = new ChessBoard();
-        }
+        // [cite: 1] - Fixed: Ensuring the GUI launches on the Swing thread
+        SwingUtilities.invokeLater(() -> {
+            this.dispose(); 
+            ChessBoard board = new ChessBoard(); 
+            new GUI(board, this.nm, isWhite); 
+        });
+    }
 }
