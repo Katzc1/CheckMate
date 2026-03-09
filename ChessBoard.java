@@ -54,4 +54,12 @@ public class ChessBoard extends JFrame {
     public static Square[][] getBoard() {
         return board;
     }
+    public static boolean squareExists(Square target, int rankDis, int fileDis) {
+    	int rank = target.getRank() + rankDis;
+    	int file = target.getFile() + fileDis;
+    	if(rank > 0 && rank < 9 && file > 0 && file < 9) {
+    		return true;
+    	}
+    	return false;
+    }
 }
