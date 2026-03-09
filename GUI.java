@@ -28,10 +28,20 @@ public class GUI extends JFrame {
         for(int row = 0; row < 8; row++) {
             for(int col = 0; col < 8; col++) {
                 JButton square = new JButton();
-                square.setBackground((row + col) % 2 == 0 ? Color.WHITE : Color.GRAY);
+                
+                //find color
+                Color squareColor = (row + col) % 2 == 0 ? Color.WHITE : Color.DARK_GRAY;
+                square.setBackground(squareColor);
+
+                //Need these lines to show color properly on mac 
+                square.setOpaque(true);
+                square.setBorderPainted(false);
+
+                //clicks
                 final int r = row;
                 final int c = col;
                 square.addActionListener(e -> handleSquareClick(r, c));
+                
                 squares[row][col] = square;
                 add(square);
             }
@@ -39,30 +49,49 @@ public class GUI extends JFrame {
     }
 
     private void handleSquareClick(int row, int col) {
-        if (!myTurn) return;
+        if (!myTurn) return; 
+
         if (startRow == -1) {
+            // First click: Select a piece
             startRow = row;
             startCol = col;
+            squares[row][col].setBorderPainted(true);
             squares[row][col].setBorder(BorderFactory.createLineBorder(Color.RED, 3));
         } else {
+            // Second click: Execute move
             Move move = new Move(startRow, startCol, row, col);
-            nm.sendMove(move);
-            applyMoveLocally(move);
-            myTurn = false;
+            
+            // 1. Send to the other player
+            nm.sendMove(move); 
+            
+            // 2. Update your own screen
+            applyMoveLocally(move); 
+            
+            // 3. END YOUR TURN
+            myTurn = false; 
+            
+            // Reset selection highlights
             squares[startRow][startCol].setBorder(null);
+            squares[startRow][startCol].setBorderPainted(false);
             startRow = -1; startCol = -1;
         }
     }
-
+    
+    
     private void startListening() {
         new Thread(() -> {
             try {
                 while (true) {
                     Move incoming = nm.receiveMove();
-                    applyMoveLocally(incoming);
-                    myTurn = true;
+                    // Use SwingUtilities to ensure UI updates happen on the correct thread
+                    SwingUtilities.invokeLater(() -> {
+                        applyMoveLocally(incoming);
+                        myTurn = true; // IT IS NOW YOUR TURN
+                    });
                 }
-            } catch (Exception e) { System.out.println("Disconnected."); }
+            } catch (Exception e) { 
+                System.out.println("Disconnected: " + e.getMessage()); 
+            }
         }).start();
     }
 
