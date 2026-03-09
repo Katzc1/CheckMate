@@ -1,5 +1,5 @@
 import java.io.Serializable;
-
+//
 @SuppressWarnings("serial")
 public class Square implements Serializable {
     public int rank;
@@ -8,20 +8,37 @@ public class Square implements Serializable {
     public boolean isOccupied;
     public Piece onSquare;
 
+    
     public Square(int row, int column) {
         this.rank = row;
         this.file = column;
     }
+    
+    
+ 
 
-    // [cite: 1] - Fixed: Using Math.pow instead of XOR (^) for distance
     public double getTotalDistance(Square destination) {
-        return Math.sqrt(Math.pow(this.rank - destination.getRank(), 2) + 
-                         Math.pow(this.file - destination.getFile(), 2));
+        return Math.sqrt(Math.pow(this.rank - destination.getRank(), 2) + Math.pow(this.file - destination.getFile(), 2));
     }
 
-    public int getRank() { return rank; }
-    public int getFile() { return file; }
-    public Piece getPieceOnSquare() { return onSquare; }
+    public int getRank() {
+    	return rank; 
+    }
+    public int getFile() { 
+    	return file; 
+    
+    }
+    public Piece getPieceOnSquare() { 
+    	return onSquare; 
+    }
+    
+    public boolean getOccupancy() {
+    	return isOccupied;
+    }
+    
+    public Piece getOccupant() { 
+    	return onSquare; 
+    }
 
     public void occupySquare(Piece p) {
         this.onSquare = p;

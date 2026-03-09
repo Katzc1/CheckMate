@@ -1,5 +1,6 @@
 public class Knight extends Piece {
 
+	//
 public Knight(String col, Square pos) {
 
 super(col, Math.sqrt(5), pos);
@@ -16,7 +17,7 @@ public boolean checkLegalMove(Square destination){
 
 //Destination Square must not be occupied by a piece of the same color
 
-if(destination.isOccupied && destination.getPieceOnSquare().getColor() == this.Color) {
+if(destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
 
 return false;
 

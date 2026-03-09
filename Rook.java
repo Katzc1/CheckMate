@@ -98,7 +98,7 @@ public class Rook extends Piece {
 	//If none of the squares in between are occupied, then the path isn't obstructed.
 	
 	return true;
-	
+	//
 	}
 	
 	//Override just saying "this is the child implementing the abstract method"
@@ -111,7 +111,7 @@ public class Rook extends Piece {
 	
 	//Destination Square must not be occupied by a piece of the same color
 	
-	if(destination.isOccupied && destination.getPieceOnSquare().getColor() == this.Color) {
+	if(destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
 	
 	return false;
 	

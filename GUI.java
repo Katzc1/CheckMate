@@ -59,19 +59,15 @@ public class GUI extends JFrame {
             squares[row][col].setBorderPainted(true);
             squares[row][col].setBorder(BorderFactory.createLineBorder(Color.RED, 3));
         } else {
-            // Second click: Execute move
-            Move move = new Move(startRow, startCol, row, col);
+
+        	Move move = new Move(startRow, startCol, row, col);
             
-            // 1. Send to the other player
             nm.sendMove(move); 
             
-            // 2. Update your own screen
             applyMoveLocally(move); 
             
-            // 3. END YOUR TURN
             myTurn = false; 
             
-            // Reset selection highlights
             squares[startRow][startCol].setBorder(null);
             squares[startRow][startCol].setBorderPainted(false);
             startRow = -1; startCol = -1;

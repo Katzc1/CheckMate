@@ -10,8 +10,8 @@ public class ConnectionUI extends JFrame {
         this.nm = nm;
         setTitle("CheckMate Online");
         setSize(350, 200);
-        setLayout(new GridLayout(4, 1)); // Increased rows to fit the IP input
-
+        setLayout(new GridLayout(4, 1)); 
+        
         ipField = new JTextField("127.0.0.1"); // Default to local for testing
         JButton hostBtn = new JButton("Host Game (Port 1234)");
         JButton joinBtn = new JButton("Join Friend");
