@@ -35,6 +35,8 @@ return false;
 
 //if(King.inCheck())
 
+
+
 //KNIGHT SPECIFIC
 
 //Destination Square must not be outside of the spaces the piece can move

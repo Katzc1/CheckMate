@@ -8,11 +8,17 @@ public class GUI extends JFrame {
     private NetworkManager nm;
     private boolean myTurn;
     private int startRow = -1, startCol = -1;
+    private String color;
 
     public GUI(ChessBoard board, NetworkManager nm, boolean isWhite) {
         this.board = board;
         this.nm = nm;
         this.myTurn = isWhite;
+        if(isWhite) {
+        	this.color = "White";
+        } else {
+        	this.color = "Black";
+        }
         
         squares = new JButton[8][8];
         setTitle("CheckMate - " + (isWhite ? "White" : "Black"));
@@ -26,47 +32,64 @@ public class GUI extends JFrame {
     }
 
     private void drawBoard() {
-        for(int row = 0; row < 8; row++) {
-            for(int col = 0; col < 8; col++) {
+        for(Square[] r: ChessBoard.getBoard()) {
+        	for(Square s: r) {
+        		
+        		final int rank = s.getRank();
+                final int file = s.getFile();
+                
                 JButton square = new JButton();
                 
+                if(s.getOccupancy()) {
+                	square = new JButton(s.getOccupant().getClass().getSimpleName());
+                	if(s.getOccupant().getColor() == "White") {
+                		square.setForeground(Color.BLUE);
+                	} else {
+                		square.setForeground(Color.RED);
+                	}
+                } else {
+                	square = new JButton();
+                }
+                
+                
                 //find color
-                Color squareColor = (row + col) % 2 == 0 ? Color.WHITE : Color.DARK_GRAY;
+                Color squareColor = (rank + file) % 2 == 0 ? Color.WHITE : Color.DARK_GRAY;
                 square.setBackground(squareColor);
+                
 
                 //Need these lines to show color properly on mac 
                 square.setOpaque(true);
                 square.setBorderPainted(false);
 
                 //clicks
-                final int r = row;
-                final int c = col;
-                square.addActionListener(e -> handleSquareClick(r, c));
+                square.addActionListener(e -> handleSquareClick(rank, file));
                 
-                squares[row][col] = square;
+                squares[rank][file] = square;
                 add(square);
-            }
+        	}
         }
     }
 
-    private void handleSquareClick(int row, int col) {
+    private void handleSquareClick(int rank, int file) {
         if (!myTurn) return; 
 
         if (startRow == -1) {
-            startRow = row;
-            startCol = col;
-            squares[row][col].setBorderPainted(true);
-            squares[row][col].setBorder(BorderFactory.createLineBorder(Color.RED, 3));
+            startRow = rank;
+            startCol = file;
+            squares[rank][file].setBorderPainted(true);
+            squares[rank][file].setBorder(BorderFactory.createLineBorder(Color.RED, 3));
         } else {
-
-        	Move move = new Move(startRow, startCol, row, col);
+            Move thisMove = new Move(ChessBoard.getSquare(startRow, startCol), ChessBoard.getSquare(rank, file), color);
             
-            nm.sendMove(move); 
+            if (thisMove.checkValidMove()) {
+                nm.sendMove(thisMove); 
+                applyMoveLocally(thisMove); 
+                myTurn = false; // Turn ends ONLY if move was valid
+            } else {
+                System.out.println("Invalid move attempted.");
+            }
             
-            applyMoveLocally(move); 
-            
-            myTurn = false; 
-            
+            // Always clear selection
             squares[startRow][startCol].setBorder(null);
             squares[startRow][startCol].setBorderPainted(false);
             startRow = -1; startCol = -1;
@@ -91,19 +114,25 @@ public class GUI extends JFrame {
     }
 
     private void applyMoveLocally(Move m) {
-        Square start = board.getSquare(m.startRow, m.startCol);
-        Square end = board.getSquare(m.endRow, m.endCol);
+        // 1. Capture UI data BEFORE the logical move happens
+        // Using the primitive ints from the Move object
+        String pieceName = squares[m.getStartRow()][m.getStartCol()].getText();
         
-        if (start.isOccupied) {
-            Piece p = start.getPieceOnSquare();
-            start.unOccupySquare();
-            if (end.isOccupied) end.unOccupySquare();
-            end.occupySquare(p);
-            p.setLocation(end);
-        }
+        // 2. Execute the logic on the ChessBoard
+        m.executeMove();
 
-        squares[m.endRow][m.endCol].setText(squares[m.startRow][m.startCol].getText());
-        squares[m.startRow][m.startCol].setText("");
+        // 3. Update the UI Buttons
+        squares[m.getEndRow()][m.getEndCol()].setText(pieceName);
+        if(ChessBoard.getSquare(m.getEndRow(), m.getEndCol()).getOccupant().getColor() == "White") {
+        	squares[m.getEndRow()][m.getEndCol()].setForeground(Color.BLUE);
+    	} else {
+    		squares[m.getEndRow()][m.getEndCol()].setForeground(Color.RED);
+    	}
+        squares[m.getStartRow()][m.getStartCol()].setText("");
+        
+        
+        // 4. Refresh the frame
+        revalidate();
         repaint();
     }
     

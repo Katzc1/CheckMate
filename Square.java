@@ -46,6 +46,7 @@ public class Square implements Serializable {
     }
 
     public void unOccupySquare() {
+    	//We cannot directly delete an object in java, we can only make it eligable for garbage collection. We can do this by making the piece null
         this.onSquare = null;
         this.isOccupied = false;
     }

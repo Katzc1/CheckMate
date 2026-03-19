@@ -32,8 +32,6 @@ throw new IllegalStateException("Destination square is not a legal move!");
 
 }
 
-
-
 //To check all the squares in a line, we have to determine where to start and stop.
 
 //Using min and max, we can be sure we start at the smaller value and end at the larger one
@@ -41,28 +39,31 @@ throw new IllegalStateException("Destination square is not a legal move!");
 //It doesn't matter that it matches the exact direction of the bishop, so long as all the
 
 //squares between the current location and destination are checked for occupancy
+    if (!sameDiagonal(destination)) return false;
 
-int startFile = Math.min(Location.getFile(), destination.getFile()) + 1;
-int startRank = Math.min(Location.getFile(), destination.getFile()) + 1;
+    int curRank = Location.getRank();
+    int curFile = Location.getFile();
+    int destRank = destination.getRank();
+    int destFile = destination.getFile();
 
-int endFile = Math.max(Location.getFile(), destination.getFile());
-int endRank = Math.max(Location.getFile(), destination.getFile());
+    //Determine the step direction (-1 or 1)
+    int rankStep = (destRank > curRank) ? 1 : -1;
+    int fileStep = (destFile > curFile) ? 1 : -1;
 
-for(int i = startRank; i<endRank; i++) {
-	
-	for(int j = startFile; j < endFile; j++) {
-		if(ChessBoard.getBoard()[i][j].isOccupied) {
-			return false;
-		}
-	}
-}
+    //Start checking from the first square after the current location
+    int checkRank = curRank + rankStep;
+    int checkFile = curFile + fileStep;
 
+    // Walk the diagonal until we hit the destination
+    while (checkRank != destRank && checkFile != destFile) {
+        if (ChessBoard.getBoard()[checkRank][checkFile].getOccupancy()) {
+            return false; // Path is blocked!
+        }
+        checkRank += rankStep;
+        checkFile += fileStep;
+    }
 
-
-//If none of the squares in between are occupied, then the path isn't obstructed.
-
-return true;
-
+    return true; // Path is clear
 }
 
 
