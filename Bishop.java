@@ -1,170 +1,98 @@
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class Bishop extends Piece {
 
+	//Constructor
+	public Bishop(String col, Square pos) {
+		super(col, 8, pos);
+	}
 
+	public boolean sameDiagonal(Square destination) {
+		if (Location.getRankDistance(destination) == Location.getFileDistance(destination)) {
+			return true;
+		}
+		return false;
+	}
 
-public Bishop(String col, Square pos) {
+	public boolean isPathClear(Square destination) {
+		//Determine the direction of the movement ((-1,-1) is up left, (-1,1) is up right, (1,1) is down right, (1,-1) is down left)
+		int rankStep = (destination.getRank() > Location.getRank()) ? 1 : -1;
+		int fileStep = (destination.getFile() > Location.getFile()) ? 1 : -1;
 
-super(col, 8, pos);
+		//Start checking from the first square after the current location
+		int checkRank = Location.getRank() + rankStep;
+		int checkFile = Location.getFile() + fileStep;
 
-}
-
-
-
-public boolean sameDiagonal(Square destination) {
-	//If the movement is the same for the vertical and horizontal, then it is on the same diagonal
-	if(Location.getRankDistance(destination) == Location.getFileDistance(destination)) {
+		// Walk the diagonal until we hit the destination
+		while (checkRank != destination.getRank() && checkFile != destination.getFile()) {
+			if (ChessBoard.getBoard()[checkRank][checkFile].getOccupancy()) {
+				return false;
+			}
+			checkRank += rankStep;
+			checkFile += fileStep;
+		}
 		return true;
 	}
-	
-	return false;
 
-}
+	//Override just saying "this is the child implementing the abstract method"
+	@Override
+	public boolean checkLegalMove(Square destination) {
 
+		//Destination Square must not be occupied by a piece of the same color
+		if (destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
+			throw new IllegalStateException("DEBUG: Target square is occupied by an ally piece!");
+		}
 
+		//Destination Square must not be the same as the current Square
+		if (Location.equals(destination) || this.Location.getTotalDistance(destination) == 0) {
+			throw new IllegalStateException("DEBUG: Target square cannot be the same as the current square!");
+		}
 
-public boolean isPathClear(Square destination) {
+		// BISHOP SPECIFC
 
-//If not on the same rank or file, move is illegal
+		//The destination must be diagonal of the starting square
+		if (!sameDiagonal(destination)) {
+			throw new IllegalStateException("DEBUG: Target square must be on the same diagonal!");
+		}
 
-if(!sameDiagonal(destination)) {
+		//There cannot be any pieces in the way (diagonal)
+		if (!isPathClear(destination)) {
+			throw new IllegalStateException("DEBUG: Target square cannot be obstructed by other pieces!");
+		}
 
-throw new IllegalStateException("Destination square is not a legal move!");
+		return true;
+	}
 
-}
+	@Override
+	public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
+		List<Move> moves = new ArrayList<>();
+		int r = currentSquare.getRank();
+		int c = currentSquare.getFile();
 
-//To check all the squares in a line, we have to determine where to start and stop.
+		int[][] directions = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
 
-//Using min and max, we can be sure we start at the smaller value and end at the larger one
+		for (int[] d : directions) {
+			for (int i = 1; i < 8; i++) {
+				int targetRank = r + (d[0] * i);
+				int targetFile = c + (d[1] * i);
 
-//It doesn't matter that it matches the exact direction of the bishop, so long as all the
+				Square target = ChessBoard.getSquare(targetRank, targetFile);
 
-//squares between the current location and destination are checked for occupancy
-    if (!sameDiagonal(destination)) return false;
+				if (target == null) break;
 
-    int curRank = Location.getRank();
-    int curFile = Location.getFile();
-    int destRank = destination.getRank();
-    int destFile = destination.getFile();
+				try {
+					if (checkLegalMove(target)) {
+						moves.add(new Move(currentSquare, target, this.Color));
+					}
+				} catch (IllegalStateException e) {
+					// Skip invalid moves found during scan
+				}
 
-    //Determine the step direction (-1 or 1)
-    int rankStep = (destRank > curRank) ? 1 : -1;
-    int fileStep = (destFile > curFile) ? 1 : -1;
-
-    //Start checking from the first square after the current location
-    int checkRank = curRank + rankStep;
-    int checkFile = curFile + fileStep;
-
-    // Walk the diagonal until we hit the destination
-    while (checkRank != destRank && checkFile != destFile) {
-        if (ChessBoard.getBoard()[checkRank][checkFile].getOccupancy()) {
-            return false; // Path is blocked!
-        }
-        checkRank += rankStep;
-        checkFile += fileStep;
-    }
-
-    return true; // Path is clear
-}
-
-
-
-//Override just saying "this is the child implementing the abstract method"
-
-//Helps in the case of a typo
-
-@Override
-
-public boolean checkLegalMove(Square destination){
-
-//Destination Square must not be occupied by a piece of the same color
-
-if(destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
-
-return false;
-
-}
-
-//Destination Square must not be the same as the current Square
-
-if(Location.equals(destination) || this.Location.getTotalDistance(destination) == 0) {
-
-return false;
-
-}
-
-//Destination Square must not be outside of the spaces the piece can move
-
-//Not applicable for bishop since it can move across the whole board
-
-
-//Moving the piece must not put the king in check - WIP
-
-//if(King.inCheck())
-
-
-
-// BISHOP SPECIFC
-
-//The destination must be diagonal of the starting square
-
-if(!sameDiagonal(destination)) {
-	return false;
-}
-
-//There cannot be any pieces in the way (diagonal)
-if(!isPathClear(destination)) {
-	return false;
-}
-
-
-return true;
-
-}
-
-
-
-@Override
-public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
-    List<Move> moves = new ArrayList<>();
-    int r = currentSquare.getRank();
-    int c = currentSquare.getFile();
-
-    // The four diagonal directions: {rowStep, colStep}
-    int[][] directions = {
-        {1, 1},   // Down-Right
-        {1, -1},  // Down-Left
-        {-1, 1},  // Up-Right
-        {-1, -1}  // Up-Left
-    };
-
-    for (int[] d : directions) {
-        // Check squares in this direction until we hit the edge of the board
-        for (int i = 1; i < 8; i++) {
-            int targetRank = r + (d[0] * i);
-            int targetFile = c + (d[1] * i);
-
-            Square target = ChessBoard.getSquare(targetRank, targetFile);
-
-            // If the square is off-board, stop looking in this direction
-            if (target == null) break;
-
-            // Use your existing logic to see if this specific square is a valid move
-            if (checkLegalMove(target)) {
-                moves.add(new Move(currentSquare, target, this.Color));
-            }
-
-            // IMPORTANT: If there is ANY piece on this square, we stop "sliding" 
-            // because a Bishop cannot jump over pieces.
-            if (target.getOccupancy()) {
-                break;
-            }
-        }
-    }
-
-    return moves;
-}
-
+				if (target.getOccupancy()) break;
+			}
+		}
+		return moves;
+	}
 }

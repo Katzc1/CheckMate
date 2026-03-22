@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 
-
 @SuppressWarnings("serial")
 public class GUI extends JFrame {
     private ChessBoard board;
@@ -10,13 +9,12 @@ public class GUI extends JFrame {
     private boolean myTurn;
     private int startRow = -1, startCol = -1;
     private String color;
-    private boolean isBot; // Added for bot mode
+    private boolean isBot; 
 
-    // Updated constructor with isBot parameter
     public GUI(ChessBoard board, NetworkManager nm, boolean isWhite, boolean isBot) {
         this.board = board;
         this.nm = nm;
-        this.isBot = isBot; // Set bot mode
+        this.isBot = isBot; 
         this.myTurn = isWhite;
         if(isWhite) {
         	this.color = "White";
@@ -31,19 +29,23 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         drawBoard();
-        // Only listen for network moves if we are NOT in bot mode
+        
         if(!isBot) {
             startListening();
         }
+        
         setVisible(true);
     }
 
     private void drawBoard() {
         for(Square[] r: ChessBoard.getBoard()) {
         	for(Square s: r) {
+        		
         		final int rank = s.getRank();
                 final int file = s.getFile();
+                
                 JButton square = new JButton();
+                
                 if(s.getOccupancy()) {
                 	square = new JButton(s.getOccupant().getClass().getSimpleName());
                 	if(s.getOccupant().getColor().equals("White")) {
@@ -51,12 +53,21 @@ public class GUI extends JFrame {
                 	} else {
                 		square.setForeground(Color.RED);
                 	}
+                } else {
+                	square = new JButton();
                 }
+                
+                //find color
                 Color squareColor = (rank + file) % 2 == 0 ? Color.WHITE : Color.DARK_GRAY;
                 square.setBackground(squareColor);
+                
+                //Need these lines to show color properly on mac 
                 square.setOpaque(true);
                 square.setBorderPainted(false);
+
+                //clicks
                 square.addActionListener(e -> handleSquareClick(rank, file));
+                
                 squares[rank][file] = square;
                 add(square);
         	}
@@ -75,15 +86,13 @@ public class GUI extends JFrame {
             Move thisMove = new Move(ChessBoard.getSquare(startRow, startCol), ChessBoard.getSquare(rank, file), color);
             
             if (thisMove.checkValidMove()) {
-                //Only use network manager if not playing a bot
                 if(!isBot) {
                     nm.sendMove(thisMove); 
                 }
                 
                 applyMoveLocally(thisMove); 
-                myTurn = false;
+                myTurn = false; // Turn ends ONLY if move was valid
 
-                //Trigger bot move if in bot mode
                 if(isBot) {
                     Timer timer = new Timer(500, e -> triggerBotMove());
                     timer.setRepeats(false);
@@ -93,13 +102,13 @@ public class GUI extends JFrame {
                 System.out.println("Invalid move attempted.");
             }
             
+            // Always clear selection
             squares[startRow][startCol].setBorder(null);
             squares[startRow][startCol].setBorderPainted(false);
             startRow = -1; startCol = -1;
         }
     }
     
-    // NEW: Small method to handle the bot's turn
     private void triggerBotMove() {
         ChessBot bot = new ChessBot();
         String botColor = color.equals("White") ? "Black" : "White";
@@ -118,12 +127,8 @@ public class GUI extends JFrame {
                     Move incoming = nm.receiveMove();
                     SwingUtilities.invokeLater(() -> {
                         applyMoveLocally(incoming);
-
-                        myTurn = true; 
-
                         GameStateManager.tickMoveTimer();
                         myTurn = true; // IT IS NOW YOUR TURN
-
                     });
                 }
             } catch (Exception e) { 
@@ -133,19 +138,8 @@ public class GUI extends JFrame {
     }
 
     private void applyMoveLocally(Move m) {
-
-        String pieceName = squares[m.getStartRow()][m.getStartCol()].getText();
-
         // Execute the logic
-
         m.executeMove();
-        squares[m.getEndRow()][m.getEndCol()].setText(pieceName);
-        if(ChessBoard.getSquare(m.getEndRow(), m.getEndCol()).getOccupant().getColor().equals("White")) {
-        	squares[m.getEndRow()][m.getEndCol()].setForeground(Color.BLUE);
-    	} else {
-    		squares[m.getEndRow()][m.getEndCol()].setForeground(Color.RED);
-    	}
-        squares[m.getStartRow()][m.getStartCol()].setText("");
 
         // Sync the entire UI with the Board Data
         for (int r = 0; r < 8; r++) {
@@ -163,14 +157,18 @@ public class GUI extends JFrame {
                 }
             }
         }
+        
+        revalidate();
+        repaint();
     }
     
     private void updateSquareVisuals() {
-        for (int r = 0; r < 8; r++) {
-            for (int c = 0; c < 8; c++) {
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
                 Square sq = ChessBoard.getSquare(r, c);
                 if (sq.isOccupied) {
                     Piece p = sq.getPieceOnSquare();
+                    // Assumes images are named like "WhitePawn.png"
                     String imgName = p.getColor() + p.getClass().getSimpleName() + ".png";
                     squares[r][c].setIcon(new ImageIcon("res/" + imgName));
                 } else {

@@ -1,7 +1,6 @@
 import java.io.Serializable;
 
-
-
+@SuppressWarnings("serial")
 public class Move implements Serializable {
     // Use primitive ints for the network transfer. 
     // These never change or "clone" incorrectly.
@@ -33,7 +32,6 @@ public class Move implements Serializable {
     }
 
     // This checks if the move is valid BEFORE sending
- // This checks if the move is valid BEFORE sending
     public boolean checkValidMove() {
         Square realStart = ChessBoard.getSquare(startRow, startCol);
         Square realEnd = ChessBoard.getSquare(endRow, endCol);
@@ -63,6 +61,8 @@ public class Move implements Serializable {
             System.out.println(ex.getMessage());
             return false;
         }
+        
+        //TO ADD: CHECK IF THE MOVE WOULD PUT THE KING IN CHECK
     }
 
     // This performs the actual swap on the master board
@@ -106,6 +106,6 @@ public class Move implements Serializable {
             realStart.unOccupySquare();
             realEnd.occupySquare(p);
             p.setLocation(realEnd);
+        }
     }
-}
 }

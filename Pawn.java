@@ -1,5 +1,6 @@
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class Pawn extends Piece {
 	
     public boolean hasMoved = false;
@@ -113,11 +114,6 @@ public class Pawn extends Piece {
 	    return false;
     }
     
-    
-
-   
-
-   
     public void promote(int pieceType) {
         Piece newPiece;
         if(pieceType == 1) {
@@ -147,7 +143,6 @@ public class Pawn extends Piece {
             this.Location = null;
         
     }
-
 
 	@Override
 	public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {

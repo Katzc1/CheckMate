@@ -1,5 +1,3 @@
-
-
 public class GameStateManager {
 	public static Square wherePassant;
 	public static int moveTimer = 0;
@@ -14,7 +12,6 @@ public class GameStateManager {
 	
 	public static Square getWherePassant() {
 		return wherePassant;
-		//YOU ARE NOT ALLOWEDD!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 	
 	public static void removePassantEligable(Square s){
@@ -30,12 +27,16 @@ public class GameStateManager {
 		moveTimer--;
 	}
 	
+	public static boolean isInCheck(King k) {
+		return false;
+	}
+	
 	public static boolean isCheckmate() {
 		return false;
 	}
 	
 	public static void handleCheckmate() {
-		
+		//You are cooked
 	}
 	
 	public static boolean isStalemate() {
