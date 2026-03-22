@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class King extends Piece {
@@ -151,8 +152,30 @@ return true;
 
 @Override
 public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
-	// TODO Auto-generated method stub
-	return null;
-}
+    List<Move> moves = new ArrayList<>();
+    int r = currentSquare.getRank();
+    int c = currentSquare.getFile();
 
+    // The 8 squares surrounding the King
+    int[][] kingOffsets = {
+        {-1, -1}, {-1, 0}, {-1, 1},
+        { 0, -1},          { 0, 1},
+        { 1, -1}, { 1, 0}, { 1, 1}
+    };
+
+    for (int[] offset : kingOffsets) {
+        int targetRank = r + offset[0];
+        int targetFile = c + offset[1];
+
+        // Use the static getter from your ChessBoard
+        Square target = ChessBoard.getSquare(targetRank, targetFile);
+
+        // If the square exists and passes your checkLegalMove logic, add it
+        if (target != null && checkLegalMove(target)) {
+            moves.add(new Move(currentSquare, target, this.Color));
+        }
+    }
+
+    return moves;
+}
 }

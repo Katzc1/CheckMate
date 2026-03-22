@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Bishop extends Piece {
@@ -127,8 +128,43 @@ return true;
 
 @Override
 public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
-	// TODO Auto-generated method stub
-	return null;
+    List<Move> moves = new ArrayList<>();
+    int r = currentSquare.getRank();
+    int c = currentSquare.getFile();
+
+    // The four diagonal directions: {rowStep, colStep}
+    int[][] directions = {
+        {1, 1},   // Down-Right
+        {1, -1},  // Down-Left
+        {-1, 1},  // Up-Right
+        {-1, -1}  // Up-Left
+    };
+
+    for (int[] d : directions) {
+        // Check squares in this direction until we hit the edge of the board
+        for (int i = 1; i < 8; i++) {
+            int targetRank = r + (d[0] * i);
+            int targetFile = c + (d[1] * i);
+
+            Square target = ChessBoard.getSquare(targetRank, targetFile);
+
+            // If the square is off-board, stop looking in this direction
+            if (target == null) break;
+
+            // Use your existing logic to see if this specific square is a valid move
+            if (checkLegalMove(target)) {
+                moves.add(new Move(currentSquare, target, this.Color));
+            }
+
+            // IMPORTANT: If there is ANY piece on this square, we stop "sliding" 
+            // because a Bishop cannot jump over pieces.
+            if (target.getOccupancy()) {
+                break;
+            }
+        }
+    }
+
+    return moves;
 }
 
 }
