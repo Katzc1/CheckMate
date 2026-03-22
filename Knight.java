@@ -3,7 +3,6 @@ import java.util.List;
 
 public class Knight extends Piece {
 
-	//
 public Knight(String col, Square pos) {
 
 super(col, Math.sqrt(5), pos);

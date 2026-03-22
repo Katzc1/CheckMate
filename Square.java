@@ -1,5 +1,6 @@
 import java.io.Serializable;
-//
+
+
 @SuppressWarnings("serial")
 public class Square implements Serializable {
     public int rank;

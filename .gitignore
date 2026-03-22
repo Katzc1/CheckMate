@@ -22,4 +22,8 @@
 /Knight.class
 /NetworkManager.class
 /ConnectionUI.class
+<<<<<<< HEAD
 /ChessBot.class
+=======
+/GameStateManager.class
+>>>>>>> refs/remotes/origin/main

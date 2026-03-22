@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
+
 @SuppressWarnings("serial")
 public class GUI extends JFrame {
     private ChessBoard board;
@@ -117,7 +118,12 @@ public class GUI extends JFrame {
                     Move incoming = nm.receiveMove();
                     SwingUtilities.invokeLater(() -> {
                         applyMoveLocally(incoming);
+
                         myTurn = true; 
+
+                        GameStateManager.tickMoveTimer();
+                        myTurn = true; // IT IS NOW YOUR TURN
+
                     });
                 }
             } catch (Exception e) { 
@@ -127,7 +133,11 @@ public class GUI extends JFrame {
     }
 
     private void applyMoveLocally(Move m) {
+
         String pieceName = squares[m.getStartRow()][m.getStartCol()].getText();
+
+        // Execute the logic
+
         m.executeMove();
         squares[m.getEndRow()][m.getEndCol()].setText(pieceName);
         if(ChessBoard.getSquare(m.getEndRow(), m.getEndCol()).getOccupant().getColor().equals("White")) {
@@ -136,8 +146,23 @@ public class GUI extends JFrame {
     		squares[m.getEndRow()][m.getEndCol()].setForeground(Color.RED);
     	}
         squares[m.getStartRow()][m.getStartCol()].setText("");
-        revalidate();
-        repaint();
+
+        // Sync the entire UI with the Board Data
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Square s = ChessBoard.getSquare(r, c);
+                if (s.getOccupancy()) {
+                    squares[r][c].setText(s.getOccupant().getClass().getSimpleName());
+                    if (s.getOccupant().getColor().equalsIgnoreCase("White")) {
+                        squares[r][c].setForeground(Color.BLUE);
+                    } else {
+                        squares[r][c].setForeground(Color.RED);
+                    }
+                } else {
+                    squares[r][c].setText("");
+                }
+            }
+        }
     }
     
     private void updateSquareVisuals() {

@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 
+
 public class NetworkManager {
     private Socket socket;
     private ObjectOutputStream out;
