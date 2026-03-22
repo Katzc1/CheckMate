@@ -86,12 +86,14 @@ public class GUI extends JFrame {
             Move thisMove = new Move(ChessBoard.getSquare(startRow, startCol), ChessBoard.getSquare(rank, file), color);
             
             if (thisMove.checkValidMove()) {
+                // CRITICAL: The checkValidMove() above sets thisMove.isEnPassant to true 
+                // if it's a valid capture. Now we send that 'true' flag to the friend.
                 if(!isBot) {
                     nm.sendMove(thisMove); 
                 }
                 
                 applyMoveLocally(thisMove); 
-                myTurn = false; // Turn ends ONLY if move was valid
+                myTurn = false;
 
                 if(isBot) {
                     Timer timer = new Timer(500, e -> triggerBotMove());
@@ -102,7 +104,6 @@ public class GUI extends JFrame {
                 System.out.println("Invalid move attempted.");
             }
             
-            // Always clear selection
             squares[startRow][startCol].setBorder(null);
             squares[startRow][startCol].setBorderPainted(false);
             startRow = -1; startCol = -1;
