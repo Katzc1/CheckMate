@@ -122,15 +122,23 @@ if(Location.equals(destination) || this.Location.getTotalDistance(destination) =
 
 }
 
-//Destination Square must not be outside of the spaces the piece can move
+//KING SPECIFC
 
+//NOTE: MAKE SURE CASTLING LOGIC IS BEFORE THIS CHECK
+
+//Castling logic
+if(!hasMoved) {
+	//You are allowed to castle if nothing is in the way...
+}
+
+//Destination Square must not be outside of the spaces the piece can move
 if(Math.abs(Location.getFileDistance(destination)) > spacesToMove || Location.getRankDistance(destination) > spacesToMove) {
 
 	throw new IllegalStateException("DEBUG: Target square is outisde of the piece's movement range!");
 
 }
 
-// KING SPECIFC
+
 
 //The destination must not put the king in check
 

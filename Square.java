@@ -25,10 +25,11 @@ public class Square implements Serializable {
     public int getRank() {
     	return rank; 
     }
+    
     public int getFile() { 
     	return file; 
-    
     }
+    
     public Piece getPieceOnSquare() { 
     	return onSquare; 
     }
@@ -59,4 +60,28 @@ public class Square implements Serializable {
     public int getFileDistance(Square destination) {
         return Math.abs(this.file - destination.getFile());
     }
+    
+  //Check if two squares share the same rank
+  	public boolean sameRank(Square destination) {
+  		if(this.getRank() == destination.getRank()) {
+  			return true;
+  		}
+  		return false;
+  	}
+  	
+  	//Check if two squares share the same file
+  	public boolean sameFile(Square destination) {
+  		if(this.getFile() == destination.getFile()) {
+  			return true;
+  		}
+  		return false;
+  	}
+  	
+  	public boolean sameDiagonal(Square destination) {
+		//If the movement is the same for the vertical and horizontal, then it is on the same diagonal
+		if(this.getRankDistance(destination) == this.getFileDistance(destination)) {
+			return true;
+		}
+		return false;
+	}
 }

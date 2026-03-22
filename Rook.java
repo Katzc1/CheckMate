@@ -1,124 +1,91 @@
+@SuppressWarnings("serial")
 public class Rook extends Piece {
 
-	
-
+	//Constructor
 	public Rook(String col, Square pos) {
-	
-	super(col, 8, pos);
-	
+		super(col, 8, pos);
 	}
-	
-	public boolean sameRank(Square destination) {
-	
-	if(Location.getRank() == destination.getRank()) {
-	
-	return true;
-	
-	}
-	
-	return false;
-	
-	}
-	
-	public boolean sameFile(Square destination) {
-	
-	if(Location.getFile() == destination.getRank()) {
-	
-	return true;
-	
-	}
-	
-	return false;
-	
-	}
+
 	
 	public boolean isPathClear(Square destination) {
-	    // 1. Get coordinates
-	    int curRank = Location.getRank();
-	    int curFile = Location.getFile();
-	    int destRank = destination.getRank();
-	    int destFile = destination.getFile();
+	    int direction;
 
-	    // 2. Determine directions
-	    // If the ranks are the same, rankStep is 0. If files are same, fileStep is 0.
-	    int rankStep = Integer.compare(destRank, curRank); // Returns 1, 0, or -1
-	    int fileStep = Integer.compare(destFile, curFile);
-
-	    // 3. Start checking from the square AFTER the current one
-	    int checkRank = curRank + rankStep;
-	    int checkFile = curFile + fileStep;
-
-	    // 4. Walk until we hit the destination square
-	    // We check BOTH because one will stay constant while the other moves
-	    while (checkRank != destRank || checkFile != destFile) {
-	        if (ChessBoard.getBoard()[checkRank][checkFile].getOccupancy()) {
-	            return false; // Path is blocked!
-	        }
-	        checkRank += rankStep;
-	        checkFile += fileStep;
+	    //In the case that the rook is moving along the same RANK:
+	    if(Location.sameRank(destination)) {
+	    	//Find if the rook is moving left (1) or right (-1)
+	    	//If distance is positive, the rook is moving to the left
+	    	if(Location.getFile() - destination.getFile() > 0) {
+	    		direction = -1;
+	    	} else {
+	    		//Otherwise the rook is moving to the right
+	    		direction = 1;
+	    	}
+	    	//Now we start checking all the squares in between the location and destination using direction 
+	    	//(AFTER the current location and BEFORE the destination since they don't matter)
+	    	for(int i = (Location.getFile() + direction); i<destination.getFile(); i+= direction) {
+	    		if(ChessBoard.getSquare(Location.getRank(),i).getOccupancy()) {
+	    			throw new IllegalStateException("DEBUG: Target square must not be obstructed by other pieces!");
+	    		}
+	    	}
 	    }
-
+	    
+	    //In the case that the rook is moving along the same FILE:
+	    if(Location.sameFile(destination)) {
+	    	//Find if the rook is moving up (1) or down (-1)
+	    	//If distance is positive, the rook is moving up
+	    	if(Location.getRank() - destination.getRank() > 0) {
+	    		direction = -1;
+	    	} else {
+	    		//Otherwise the rook is moving down
+	    		direction = 1;
+	    	}
+	    	
+	    	 //Now we start checking all the squares in between the location and destination using direction 
+	    	//(AFTER the current location and BEFORE the destination since they don't matter)
+	    	for(int i = (Location.getRank() + direction); i<destination.getRank(); i+= direction) {
+	    		if(ChessBoard.getSquare(i,Location.getFile()).getOccupancy()) {
+	    			throw new IllegalStateException("DEBUG: Target square must not be obstructed by other pieces!");
+	    		}
+	    	}
+	    }
 	    return true;
 	}
 	
+	
 	//Override just saying "this is the child implementing the abstract method"
-	
-	//Helps in the case of a typo
-	
 	@Override
-	
 	public boolean checkLegalMove(Square destination){
 	
-	//Destination Square must not be occupied by a piece of the same color
-	
-	if(destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
-	
-	return false;
-	
+		//Destination Square must not be occupied by a piece of the same color
+		if(destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
+			throw new IllegalStateException("DEBUG: Target square is occupied by an ally piece!");
+		}
+		
+		//Destination Square must not be the same as the current Square
+		if(Location.equals(destination) || this.Location.getTotalDistance(destination) == 0) {
+			throw new IllegalStateException("DEBUG: Target square cannot be the same as the destination square!");
+		}
+		
+		//Moving the piece must not put the king in check - WIP
+		//if(King.inCheck())
+		
+		// ROOK SPECIFC
+		
+		//The destination must be on the same rank or file
+		if(!Location.sameRank(destination) && !Location.sameFile(destination)) {
+			throw new IllegalStateException("DEBUG: Target square must be on the same rank or file as the current location!");
+		} 
+		
+		//There must not be any pieces in the way (On rank or file)
+		//Only call if there is actually a path (aka its not a 1 square move
+		if(Location.getTotalDistance(destination) > 1) {
+			if(!isPathClear(destination)) {
+				throw new IllegalStateException("DEBUG: Target square must not be obstructed by other pieces!");
+			}
+		}
+		
+		//If none of the conditions are violated, the move is legal and permitted to go through
+		return true;
 	}
-	
-	//Destination Square must not be the same as the current Square
-	
-	if(Location.equals(destination) || this.Location.getTotalDistance(destination) == 0) {
-	
-	return false;
-	
-	}
-	
-	//Destination Square must not be outside of the spaces the piece can move
-	
-	//Not applicable for rook since it can move across the whole board
-	
-	// if(Math.abs(Location.getFileDistance(destination)) - spacesToMove < 0 || Location.getRankDistance(destination) - spacesToMove < 0) {
-	
-	// return false;
-	
-	// }
-	
-	//Moving the piece must not put the king in check - WIP
-	
-	//if(King.inCheck())
-	
-	// ROOK SPECIFC
-	
-	//The destination must be on the same rank or file
-	
-	if(!sameRank(destination) && !sameFile(destination)) {
-	
-	return false;
-	
-	}
-	
-	//There must not be any pieces in the way (On rank or file)
-	
-	if(!isPathClear(destination)) {
-	
-	return false;
-	
-	}
-	
-	return true;
-	
-	}
-	
+		
 }

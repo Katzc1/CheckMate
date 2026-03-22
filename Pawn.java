@@ -1,3 +1,4 @@
+@SuppressWarnings("serial")
 public class Pawn extends Piece {
 	
     public boolean hasMoved = false;
