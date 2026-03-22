@@ -1,5 +1,5 @@
 public class Bishop extends Piece {
-//
+
 
 
 public Bishop(String col, Square pos) {

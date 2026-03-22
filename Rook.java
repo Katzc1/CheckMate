@@ -1,5 +1,6 @@
 public class Rook extends Piece {
 
+	
 
 	public Rook(String col, Square pos) {
 	

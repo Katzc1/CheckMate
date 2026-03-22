@@ -124,7 +124,7 @@ if(Location.equals(destination) || this.Location.getTotalDistance(destination) =
 
 //Destination Square must not be outside of the spaces the piece can move
 
-if(Math.abs(Location.getFileDistance(destination)) - spacesToMove < 0 || Location.getRankDistance(destination) - spacesToMove < 0) {
+if(Math.abs(Location.getFileDistance(destination)) > spacesToMove || Location.getRankDistance(destination) > spacesToMove) {
 
 	throw new IllegalStateException("DEBUG: Target square is outisde of the piece's movement range!");
 
@@ -134,11 +134,11 @@ if(Math.abs(Location.getFileDistance(destination)) - spacesToMove < 0 || Locatio
 
 //The destination must not put the king in check
 
-if(wouldBeInCheck(destination)) {
-
-	throw new IllegalStateException("DEBUG: Target square would put the king in check!");
-
-}
+//if(wouldBeInCheck(destination)) {
+//
+//	throw new IllegalStateException("DEBUG: Target square would put the king in check!");
+//
+//}
 
 
 return true;

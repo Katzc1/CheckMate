@@ -1,5 +1,7 @@
 import java.io.Serializable;
 
+
+
 public class Move implements Serializable {
     // Use primitive ints for the network transfer. 
     // These never change or "clone" incorrectly.

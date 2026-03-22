@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
+
 @SuppressWarnings("serial")
 public class GUI extends JFrame {
     private ChessBoard board;

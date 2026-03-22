@@ -1,4 +1,5 @@
 public class Pawn extends Piece {
+	
     public boolean hasMoved = false;
     public int direction = 0;
 

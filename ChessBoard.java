@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
+
 @SuppressWarnings("serial")
 public class ChessBoard extends JFrame {
 
