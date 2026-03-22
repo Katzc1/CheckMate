@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Pawn extends Piece {
 	//
     public boolean hasMoved = false;
@@ -80,4 +82,11 @@ public class Pawn extends Piece {
             this.Location = null;
         
     }
+
+
+	@Override
+	public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

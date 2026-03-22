@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Rook extends Piece {
 
 
@@ -118,6 +120,12 @@ public class Rook extends Piece {
 	
 	return true;
 	
+	}
+
+	@Override
+	public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

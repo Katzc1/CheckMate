@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class King extends Piece {
 
 //
@@ -145,6 +147,12 @@ return false;
 
 return true;
 
+}
+
+@Override
+public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
+	// TODO Auto-generated method stub
+	return null;
 }
 
 }

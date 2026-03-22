@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Bishop extends Piece {
 //
 
@@ -119,6 +121,14 @@ if(!isPathClear(destination)) {
 
 return true;
 
+}
+
+
+
+@Override
+public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
+	// TODO Auto-generated method stub
+	return null;
 }
 
 }

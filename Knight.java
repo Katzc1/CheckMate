@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Knight extends Piece {
 
 	//
@@ -55,6 +58,31 @@ return false;
 
 return true;
 
+}
+
+@Override
+public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
+    List<Move> moves = new ArrayList<>();
+    
+    // These are the only 8 relative positions a knight can move to
+    int[][] offsets = {
+        {-2, -1}, {-2, 1}, {2, -1}, {2, 1},
+        {-1, -2}, {-1, 2}, {1, -2}, {1, 2}
+    };
+
+    for (int[] o : offsets) {
+        int targetRank = currentSquare.getRank() + o[0];
+        int targetFile = currentSquare.getFile() + o[1];
+
+        // Use the static getter from your ChessBoard
+        Square target = ChessBoard.getSquare(targetRank, targetFile);
+
+        // If the square is on the board and passes your checkLegalMove logic
+        if (target != null && checkLegalMove(target)) {
+            moves.add(new Move(currentSquare, target, this.Color));
+        }
+    }
+    return moves;
 }
 
 }

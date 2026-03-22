@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Queen extends Piece {
 
 //
@@ -184,6 +186,12 @@ if(sameDiagonal(destination)) {
 
 return true;
 
+}
+
+@Override
+public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
+	// TODO Auto-generated method stub
+	return null;
 }
 
 }

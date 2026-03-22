@@ -2,6 +2,7 @@
 
 //The pieces on the board will always be child pieces such as pawns and rooks
 import java.io.Serializable;
+import java.util.List;
 
 public abstract class Piece implements Serializable {
 
@@ -52,5 +53,5 @@ public String getColor() {
 return Color;
 
 }
-
+public abstract List<Move> getValidMoves(ChessBoard board, Square currentSquare);
 }

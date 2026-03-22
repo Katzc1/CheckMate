@@ -9,10 +9,13 @@ public class GUI extends JFrame {
     private boolean myTurn;
     private int startRow = -1, startCol = -1;
     private String color;
+    private boolean isBot; // Added for bot mode
 
-    public GUI(ChessBoard board, NetworkManager nm, boolean isWhite) {
+    // Updated constructor with isBot parameter
+    public GUI(ChessBoard board, NetworkManager nm, boolean isWhite, boolean isBot) {
         this.board = board;
         this.nm = nm;
+        this.isBot = isBot; // Set bot mode
         this.myTurn = isWhite;
         if(isWhite) {
         	this.color = "White";
@@ -27,43 +30,32 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         drawBoard();
-        startListening();
+        // Only listen for network moves if we are NOT in bot mode
+        if(!isBot) {
+            startListening();
+        }
         setVisible(true);
     }
 
     private void drawBoard() {
         for(Square[] r: ChessBoard.getBoard()) {
         	for(Square s: r) {
-        		
         		final int rank = s.getRank();
                 final int file = s.getFile();
-                
                 JButton square = new JButton();
-                
                 if(s.getOccupancy()) {
                 	square = new JButton(s.getOccupant().getClass().getSimpleName());
-                	if(s.getOccupant().getColor() == "White") {
+                	if(s.getOccupant().getColor().equals("White")) {
                 		square.setForeground(Color.BLUE);
                 	} else {
                 		square.setForeground(Color.RED);
                 	}
-                } else {
-                	square = new JButton();
                 }
-                
-                
-                //find color
                 Color squareColor = (rank + file) % 2 == 0 ? Color.WHITE : Color.DARK_GRAY;
                 square.setBackground(squareColor);
-                
-
-                //Need these lines to show color properly on mac 
                 square.setOpaque(true);
                 square.setBorderPainted(false);
-
-                //clicks
                 square.addActionListener(e -> handleSquareClick(rank, file));
-                
                 squares[rank][file] = square;
                 add(square);
         	}
@@ -82,20 +74,41 @@ public class GUI extends JFrame {
             Move thisMove = new Move(ChessBoard.getSquare(startRow, startCol), ChessBoard.getSquare(rank, file), color);
             
             if (thisMove.checkValidMove()) {
-                nm.sendMove(thisMove); 
+                //Only use network manager if not playing a bot
+                if(!isBot) {
+                    nm.sendMove(thisMove); 
+                }
+                
                 applyMoveLocally(thisMove); 
-                myTurn = false; // Turn ends ONLY if move was valid
+                myTurn = false;
+
+                //Trigger bot move if in bot mode
+                if(isBot) {
+                    Timer timer = new Timer(500, e -> triggerBotMove());
+                    timer.setRepeats(false);
+                    timer.start();
+                }
             } else {
                 System.out.println("Invalid move attempted.");
             }
             
-            // Always clear selection
             squares[startRow][startCol].setBorder(null);
             squares[startRow][startCol].setBorderPainted(false);
             startRow = -1; startCol = -1;
         }
     }
     
+    // NEW: Small method to handle the bot's turn
+    private void triggerBotMove() {
+        ChessBot bot = new ChessBot();
+        String botColor = color.equals("White") ? "Black" : "White";
+        Move botMove = bot.generateRandomMove(this.board, botColor);
+
+        if (botMove != null) {
+            applyMoveLocally(botMove);
+            myTurn = true;
+        }
+    }
     
     private void startListening() {
         new Thread(() -> {
@@ -104,7 +117,7 @@ public class GUI extends JFrame {
                     Move incoming = nm.receiveMove();
                     SwingUtilities.invokeLater(() -> {
                         applyMoveLocally(incoming);
-                        myTurn = true; // IT IS NOW YOUR TURN
+                        myTurn = true; 
                     });
                 }
             } catch (Exception e) { 
@@ -114,35 +127,25 @@ public class GUI extends JFrame {
     }
 
     private void applyMoveLocally(Move m) {
-        // 1. Capture UI data BEFORE the logical move happens
-        // Using the primitive ints from the Move object
         String pieceName = squares[m.getStartRow()][m.getStartCol()].getText();
-        
-        // 2. Execute the logic on the ChessBoard
         m.executeMove();
-
-        // 3. Update the UI Buttons
         squares[m.getEndRow()][m.getEndCol()].setText(pieceName);
-        if(ChessBoard.getSquare(m.getEndRow(), m.getEndCol()).getOccupant().getColor() == "White") {
+        if(ChessBoard.getSquare(m.getEndRow(), m.getEndCol()).getOccupant().getColor().equals("White")) {
         	squares[m.getEndRow()][m.getEndCol()].setForeground(Color.BLUE);
     	} else {
     		squares[m.getEndRow()][m.getEndCol()].setForeground(Color.RED);
     	}
         squares[m.getStartRow()][m.getStartCol()].setText("");
-        
-        
-        // 4. Refresh the frame
         revalidate();
         repaint();
     }
     
     private void updateSquareVisuals() {
-        for (int r = 1; r < 9; r++) {
-            for (int c = 1; c < 9; c++) {
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
                 Square sq = ChessBoard.getSquare(r, c);
                 if (sq.isOccupied) {
                     Piece p = sq.getPieceOnSquare();
-                    // Assumes images are named like "WhitePawn.png"
                     String imgName = p.getColor() + p.getClass().getSimpleName() + ".png";
                     squares[r][c].setIcon(new ImageIcon("res/" + imgName));
                 } else {

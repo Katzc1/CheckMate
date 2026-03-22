@@ -48,7 +48,12 @@ public class ChessBoard extends JFrame {
     }
 
     static public Square getSquare(int row, int col) {
-        return board[row][col];
+        // Check if the requested row and col are actually on the 0-7 board
+        if (row >= 0 && row < 8 && col >= 0 && col < 8) {
+            return board[row][col];
+        }
+        // Return null if it's off-board so the Knight/Bot knows to ignore it
+        return null;
     }
 
     public static Square[][] getBoard() {
