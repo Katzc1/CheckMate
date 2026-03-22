@@ -43,7 +43,7 @@ public class ConnectionUI extends JFrame {
             }).start();
         });
 
-        // --- BOT ACTION ---
+        // bot move
         botBtn.addActionListener(e -> {
             startGame(true, true); 
         });

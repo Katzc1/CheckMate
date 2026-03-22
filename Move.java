@@ -78,8 +78,6 @@ public class Move implements Serializable {
             realStart.unOccupySquare();
             realEnd.occupySquare(p);
             p.setLocation(realEnd);
-        }
-        
-        
+        } 
     }
 }
