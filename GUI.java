@@ -104,6 +104,7 @@ public class GUI extends JFrame {
                     Move incoming = nm.receiveMove();
                     SwingUtilities.invokeLater(() -> {
                         applyMoveLocally(incoming);
+                        GameStateManager.tickMoveTimer();
                         myTurn = true; // IT IS NOW YOUR TURN
                     });
                 }
@@ -114,24 +115,26 @@ public class GUI extends JFrame {
     }
 
     private void applyMoveLocally(Move m) {
-        // 1. Capture UI data BEFORE the logical move happens
-        // Using the primitive ints from the Move object
-        String pieceName = squares[m.getStartRow()][m.getStartCol()].getText();
-        
-        // 2. Execute the logic on the ChessBoard
+        // Execute the logic
         m.executeMove();
 
-        // 3. Update the UI Buttons
-        squares[m.getEndRow()][m.getEndCol()].setText(pieceName);
-        if(ChessBoard.getSquare(m.getEndRow(), m.getEndCol()).getOccupant().getColor() == "White") {
-        	squares[m.getEndRow()][m.getEndCol()].setForeground(Color.BLUE);
-    	} else {
-    		squares[m.getEndRow()][m.getEndCol()].setForeground(Color.RED);
-    	}
-        squares[m.getStartRow()][m.getStartCol()].setText("");
-        
-        
-        // 4. Refresh the frame
+        // Sync the entire UI with the Board Data
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Square s = ChessBoard.getSquare(r, c);
+                if (s.getOccupancy()) {
+                    squares[r][c].setText(s.getOccupant().getClass().getSimpleName());
+                    if (s.getOccupant().getColor().equalsIgnoreCase("White")) {
+                        squares[r][c].setForeground(Color.BLUE);
+                    } else {
+                        squares[r][c].setForeground(Color.RED);
+                    }
+                } else {
+                    squares[r][c].setText("");
+                }
+            }
+        }
+
         revalidate();
         repaint();
     }

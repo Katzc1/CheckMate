@@ -31,6 +31,7 @@ public class Move implements Serializable {
     }
 
     // This checks if the move is valid BEFORE sending
+ // This checks if the move is valid BEFORE sending
     public boolean checkValidMove() {
         Square realStart = ChessBoard.getSquare(startRow, startCol);
         Square realEnd = ChessBoard.getSquare(endRow, endCol);
@@ -42,20 +43,24 @@ public class Move implements Serializable {
         
         Piece p = realStart.getOccupant();
         
-        // DEBUG: See exactly what the computer is comparing
-        System.out.println("Debug: Piece Color: " + p.getColor() + " | Player Color: " + playerColor);
-
-        // 1. Check Color (Ignoring case and extra spaces)
+        // 1. Check Color 
         if (!p.getColor().trim().equalsIgnoreCase(playerColor.trim())) {
             System.out.println("Debug: Color Mismatch!");
             return false;
         }
 
-        // 2. Check Piece Rules (Pawn/Rook/etc)
-        boolean legal = p.checkLegalMove(realEnd);
-        if (!legal) System.out.println("Debug: Piece rules say move is illegal");
-        
-        return legal;
+        // 2. CRITICAL: Reset the En Passant intent flag before checking logic
+        // This prevents "ghost" captures from previous UI interactions
+        GameStateManager.wantsToPassant = false;
+
+        // 3. Check Piece Rules (Pawn/Rook/etc)
+        try {
+            // This call will set wantsToPassant to true ONLY if it's a valid En Passant
+            return p.checkLegalMove(realEnd);
+        } catch (IllegalStateException ex) {
+            System.out.println(ex.getMessage());
+            return false;
+        }
     }
 
     // This performs the actual swap on the master board
@@ -67,10 +72,31 @@ public class Move implements Serializable {
             Piece p = realStart.getOccupant();
             
             if (p instanceof Pawn) {
+                // 1. CAPTURE LOGIC
+                if (GameStateManager.wantsToPassant) {
+                    // Get the square we marked as vulnerable in the previous turn
+                    Square victimSquare = GameStateManager.getWherePassant();
+                    if (victimSquare != null) {
+                        System.out.println("DEBUG: EN PASSANT SUCCESS! Deleting victim at " + victimSquare.getRank());
+                        victimSquare.unOccupySquare();
+                    }
+                    // Reset flags
+                    GameStateManager.wantsToPassant = false;
+                    GameStateManager.thereIsPassant = false;
+                } 
+                // 2. DOUBLE JUMP LOGIC (Set for next turn)
+                else if (Math.abs(startRow - endRow) == 2) {
+                    GameStateManager.setPassantEligable(realEnd);
+                }
+                // 3. NORMAL MOVE (Clear old passant)
+                else {
+                    GameStateManager.thereIsPassant = false;
+                }
+
                 ((Pawn) p).hasMoved = true;
             }
-            
-            // Handle Capture logic locally
+
+            // Standard Capture/Move Logic
             if (realEnd.getOccupancy()) {
                 realEnd.unOccupySquare();
             }
@@ -79,7 +105,5 @@ public class Move implements Serializable {
             realEnd.occupySquare(p);
             p.setLocation(realEnd);
         }
-        
-        
     }
-}
+    }

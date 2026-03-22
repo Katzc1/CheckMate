@@ -1,54 +1,118 @@
 public class Pawn extends Piece {
-	//
     public boolean hasMoved = false;
-    public boolean enPassantEligible = false;
+    public int direction = 0;
 
     public Pawn(String col, Square pos) {
         super(col, 2, pos); // Range starts at 2 for the first move
     }
     
-    
     @Override
     public boolean checkLegalMove(Square destination) {
-        // 1. Basic Safety Checks
-        if (destination.isOccupied && destination.getOccupant().getColor().equals(this.Color)) return false;
-        if (Location.equals(destination)) return false;
+    	//Thrown errors are self explanatory
+        if (destination.isOccupied && destination.getOccupant().getColor().equals(this.Color)) {
+        	throw new IllegalStateException("DEBUG: Target square is occupied by an ally piece!");
+        }
+        
+        if (Location.equals(destination)) {
+        	throw new IllegalStateException("DEBUG: Target square is same as current location!");
+        }
 
-        // 2. COORDINATE MATH
-        // In your board: Row (Rank) is vertical, Column (File) is horizontal
+      //For white, since 0,0 is in the top left, white's direction is technically negative. Just simplify the direction for easier math later.
+        if(this.Color.equalsIgnoreCase("Black")){
+        	this.direction = 1;
+        } else {
+        	this.direction = -1;
+        }
+
+        //Check the distance to the location
         int fileDist = destination.getFile() - this.Location.getFile();
         int rankDist = destination.getRank() - this.Location.getRank();
         
-        // DIRECTION FIX: 
-        // White is at row 6, moving to row 4. Dist = 4 - 6 = -2.
-        // So for White, direction is -1. For Black (row 1 to 3), direction is 1.
-        int direction = this.Color.equalsIgnoreCase("White") ? -1 : 1;
-        int startingRow = this.Color.equalsIgnoreCase("White") ? 6 : 1;
-
-        // 3. STRAIGHT MOVE (No Captures)
+        //SPECIAL EN PASSANT LOGIC
+        if (Math.abs(fileDist) == 1 && rankDist == this.direction) {
+            if (this.checkEnPassant(destination)) {
+            	//Tells the game state that the user wants to preform en passant
+            	System.out.println("I know the problem is here idk how to fix it maybe ill touch myself bro");
+            	GameStateManager.letMePassant();
+                return true;
+            }
+        }
+        
+        //TYPICAL MOVE LOGIC
+        
+        //Moving straight forwards
         if (fileDist == 0) {
-            // One square forward
-            if (rankDist == direction) {
-                return !destination.getOccupancy();
-            }
+            // Two squares forward on the first move (only if havent moved yet
             
-            // Two squares forward (e2 to e4)
-            if (!hasMoved && rankDist == 2 * direction) {
-                // Check the square in the middle (e3)
-                Square middleSquare = ChessBoard.getBoard()[this.Location.getRank() + direction][this.Location.getFile()];
-                return !destination.getOccupancy() && !middleSquare.getOccupancy();
+            	//If its trying to move more than 2 squares,
+            	if(rankDist == 2 * direction) { 
+            		//Make sure its the first move it tries to make.
+            		if (!hasMoved) {
+	            		// Check the square in the middle to see if it's occupied (since we know rankdist is 2*direction, we can add 1 of the inverse to get the square inbetween (ex add -1 * 1 to 2 and -1 * -1 (1) to -2)
+	            		// And file stays the same
+	            		if(ChessBoard.getSquare((destination.getRank() + ((-1)*direction)), (destination.getFile())).getOccupancy()) {
+	            			throw new IllegalStateException("DEBUG: Pawn cannot jump over the pieces!");
+	            		} else {
+	            			//If the pawn moves 2 squares, it is vulnerable to an en passant capture for one move.
+	            			
+	            			return true;
+	            		}
+            		} else {
+            			throw new IllegalStateException("DEBUG: Pawn cannot move in an illegal direction / an illegal amount of squares!");
+            		}
+            	} else {
+            		 // One square forward
+                    // Only if the pawn is moving in the correct direction (and since it is scaled to 1, we also know its the correct amount of squares
+                    if (rankDist == direction) {
+                    	if(!destination.getOccupancy()) {
+                    		return true;
+                    	} else {
+                    		throw new IllegalStateException("DEBUG: Da pawns cannot headbutt da other paws twin");
+                    	}
+                        
+                    } else { 
+                    	throw new IllegalStateException("DEBUG: Pawn cannot move in an illegal direction / an illegal amount of squares!");
+                    }
+            	}
+
+        } else {
+        	//If the pawn isn't trying to move in a straight line, then make sure it's attempting to capture
+            if (Math.abs(fileDist) == 1 && rankDist == direction) {
+                if (destination.getOccupancy()) {
+                    //Since it already passed the check to see if the destination is occupied by a friendly piece, we can assume that it will always check for an enemy piece
+                	//The pawn is allowed to move diagonally in this case.
+                	return true;
+                } else {
+                	throw new IllegalStateException("DEBUG: Pawn cannot move diagonally to an unoccupied square!");
+                }
+            } else {
+            	throw new IllegalStateException("DEBUG: Pawn cannot move in an illegal direction / an illegal amount of squares!");
             }
         }
-
-        // 4. DIAGONAL CAPTURE
-        if (Math.abs(fileDist) == 1 && rankDist == direction) {
-            if (destination.getOccupancy()) {
-                return !destination.getOccupant().getColor().equals(this.Color);
-            }
-        }
-
-        return false; 
+        
     }
+    
+   
+    public boolean checkEnPassant(Square destination) {
+    	Square victim = ChessBoard.getSquare(this.Location.getRank(), destination.getFile());
+    	if(victim.getOccupancy()) {
+    		if(victim.getOccupant() instanceof Pawn) {
+        		//If that square has a pawn, is it vulnerable to en passant?
+            	if(GameStateManager.thereIsPassant) {
+            		if(GameStateManager.getWherePassant().equals(victim)) {
+                		return true;
+            		}
+            	}
+            }
+    	}
+	    
+	    //No passant
+	    return false;
+    }
+    
+    
+
+   
 
    
     public void promote(int pieceType) {

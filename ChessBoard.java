@@ -4,7 +4,7 @@ import java.awt.*;
 @SuppressWarnings("serial")
 public class ChessBoard extends JFrame {
 
-    // Removed 'static' to allow for better object-oriented control
+    // Many methods in this class are static since we only ever initialize one chessBoard object and creating multiple instances/clones is confusing
     private static Square[][] board;
 
     public ChessBoard() {
@@ -57,7 +57,7 @@ public class ChessBoard extends JFrame {
     public static boolean squareExists(Square target, int rankDis, int fileDis) {
     	int rank = target.getRank() + rankDis;
     	int file = target.getFile() + fileDis;
-    	if(rank > 0 && rank < 9 && file > 0 && file < 9) {
+    	if(rank >= 0 && rank < 8 && file >= 0 && file < 8) {
     		return true;
     	}
     	return false;

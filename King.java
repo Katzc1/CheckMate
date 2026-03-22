@@ -111,16 +111,14 @@ public boolean checkLegalMove(Square destination){
 //Destination Square must not be occupied by a piece of the same color
 
 if(destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
-
-return false;
-
+	throw new IllegalStateException("DEBUG: Target square is occupied by an ally piece!");
 }
 
 //Destination Square must not be the same as the current Square
 
 if(Location.equals(destination) || this.Location.getTotalDistance(destination) == 0) {
 
-return false;
+	throw new IllegalStateException("DEBUG: Target square is same as starting square!");
 
 }
 
@@ -128,7 +126,7 @@ return false;
 
 if(Math.abs(Location.getFileDistance(destination)) - spacesToMove < 0 || Location.getRankDistance(destination) - spacesToMove < 0) {
 
-return false;
+	throw new IllegalStateException("DEBUG: Target square is outisde of the piece's movement range!");
 
 }
 
@@ -138,7 +136,7 @@ return false;
 
 if(wouldBeInCheck(destination)) {
 
-return false;
+	throw new IllegalStateException("DEBUG: Target square would put the king in check!");
 
 }
 
