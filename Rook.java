@@ -23,8 +23,8 @@ public class Rook extends Piece {
 			}
 			//Now we start checking all the squares in between the location and destination using direction 
 			//(AFTER the current location and BEFORE the destination since they don't matter)
-			for (int i = (Location.getFile() + direction); i < destination.getFile(); i += direction) {
-				if (ChessBoard.getSquare(Location.getRank(), i).getOccupancy()) {
+			for (int i = 1; i < Location.getFileDistance(destination); i++) {
+				if (ChessBoard.getSquare(Location.getRank(), (Location.getFile() + direction*i)).getOccupancy()) {
 					throw new IllegalStateException("DEBUG: Target square must not be obstructed by other pieces!");
 				}
 			}
@@ -43,8 +43,8 @@ public class Rook extends Piece {
 
 			//Now we start checking all the squares in between the location and destination using direction 
 			//(AFTER the current location and BEFORE the destination since they don't matter)
-			for (int i = (Location.getRank() + direction); i < destination.getRank(); i += direction) {
-				if (ChessBoard.getSquare(i, Location.getFile()).getOccupancy()) {
+			for (int i = 1; i < Location.getRankDistance(destination); i++) {
+				if (ChessBoard.getSquare((Location.getRank() + direction*i), Location.getFile()).getOccupancy()) {
 					throw new IllegalStateException("DEBUG: Target square must not be obstructed by other pieces!");
 				}
 			}
