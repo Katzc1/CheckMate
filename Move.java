@@ -6,12 +6,28 @@ public class Move implements Serializable {
    //Both en passant and castling impact mutliple different squares, so they must be stored over the network.
    public boolean isEnPassant = false;
    public boolean isCastle = false;
+   public Rook DAROOK = null;
    public Move(Square location, Square destination, String playerColor) {
        this.startRow = location.getRank();
        this.startCol = location.getFile();
        this.endRow = destination.getRank();
        this.endCol = destination.getFile();
        this.playerColor = playerColor;
+   }
+  
+   private void checkOpponentCheckmate(String currentMovingColor) {
+       String opponentColor = currentMovingColor.equalsIgnoreCase("White") ? "Black" : "White";
+       Piece[] opponentPieces = opponentColor.equalsIgnoreCase("White") ?
+                                ChessBoard.getWhitePieces() : ChessBoard.getBlackPieces();
+      
+       for (Piece piece : opponentPieces) {
+           if (piece instanceof King) {
+               if (GameStateManager.isCheckmate((King) piece)) {
+                   GameStateManager.handleCheckmate();
+               }
+               return;
+           }
+       }
    }
    public boolean checkValidMove() {
        Square realStart = ChessBoard.getSquare(startRow, startCol);
@@ -35,6 +51,7 @@ public class Move implements Serializable {
            }
           
            if (valid && GameStateManager.wantsToCastle) {
+           	DAROOK = (Rook)GameStateManager.castleWith[1];
            	this.isCastle = true;
            }
            //Now, would the move put the king in check??
@@ -94,50 +111,71 @@ public class Move implements Serializable {
           
            //Handle castling
            if(this.isCastle) {
-           	//Move the king
-           	GameStateManager.whereCastle()[0].Location.unOccupySquare();
-           	realEnd.occupySquare(GameStateManager.whereCastle()[0]);
-           	GameStateManager.whereCastle()[0].setLocation(realEnd);
-           	
-           	//Move the rook
-               // If King moved to the right (file 6), Rook goes to the left of it (file 5)
-               // If King moved to the left (file 2), Rook goes to the right of it (file 3)
-               int rookStartFile = (endCol == 6) ? 7 : 0;
-               int rookEndFile = (endCol == 6) ? 5 : 3;
+               // Move the King
+               p.Location.unOccupySquare();
+               realEnd.occupySquare(p);
+               p.setLocation(realEnd);
               
-               Square rookStartSquare = ChessBoard.getSquare(startRow, rookStartFile);
-               Square rookEndSquare = ChessBoard.getSquare(startRow, rookEndFile);
-               rookStartSquare.unOccupySquare();
-               rookEndSquare.occupySquare(rookStartSquare.getOccupant());
-               rookStartSquare.getOccupant().setLocation(rookEndSquare);
-           }
-           // Standard Pawn State Logic
-           if (p instanceof Pawn) {
-               if (Math.abs(startRow - endRow) == 2) {
-                   GameStateManager.setPassantEligable(realEnd);
+               //Move the Rook
+               if (DAROOK != null) {
+                   int direction = (startCol - endCol > 0) ? 1 : -1;
+                   int rookEndFile = (endCol == 6) ? 5 : 3;
+                   Square rookEndSquare = ChessBoard.getSquare(startRow, rookEndFile);
+                  
+                   DAROOK.Location.unOccupySquare(); // Use DAROOK directly
+                   rookEndSquare.occupySquare(DAROOK);
+                   DAROOK.setLocation(rookEndSquare);
+                   DAROOK.hasMoved = true;
+               }
+              
+               // Reset the global flag so it doesn't interfere with next turn
+               GameStateManager.wantsToCastle = false;
+           } else {
+           	// Standard Pawn State Logic
+               if (p instanceof Pawn) {
+                   if (Math.abs(startRow - endRow) == 2) {
+                       GameStateManager.setPassantEligable(realEnd);
+                   } else {
+                       GameStateManager.thereIsPassant = false;
+                   }
+                   ((Pawn) p).hasMoved = true;
                } else {
                    GameStateManager.thereIsPassant = false;
                }
-               ((Pawn) p).hasMoved = true;
-           } else {
-               GameStateManager.thereIsPassant = false;
+              
+               //King logic (for castling)
+               if(p instanceof King) {
+               	((King) p).hasMoved = true;
+               }
+              
+               //Rook logic (for castling)
+               if(p instanceof Rook) {
+               	((Rook) p).hasMoved = true;
+               }
+               // Finalize the move
+               if (realEnd.getOccupancy()) realEnd.unOccupySquare();
+               realStart.unOccupySquare();
+               realEnd.occupySquare(p);
+               p.setLocation(realEnd);
+              
            }
+           //CHECKMATE CHECK
+           String enemyColor = p.getColor().equalsIgnoreCase("White") ? "Black" : "White";
           
-           //King logic (for castling)
-           if(p instanceof King) {
-           	((King) p).hasMoved = true;
-           }
+           //Find the enemy King and check if they are checkmated
+           Piece[] enemyPieces = enemyColor.equalsIgnoreCase("White") ? ChessBoard.getWhitePieces() : ChessBoard.getBlackPieces();
           
-           //Rook logic (for castling)
-           if(p instanceof Rook) {
-           	((Rook) p).hasMoved = true;
+           for (Piece piece : enemyPieces) {
+               if (piece instanceof King) {
+                   if (GameStateManager.isCheckmate((King) piece)) {
+                       GameStateManager.handleCheckmate();
+                   }
+                   break;
+               }
            }
-           // Finalize the move
-           if (realEnd.getOccupancy()) realEnd.unOccupySquare();
-           realStart.unOccupySquare();
-           realEnd.occupySquare(p);
-           p.setLocation(realEnd);
        }
    }
 }
+
+
 

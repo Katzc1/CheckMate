@@ -3,6 +3,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class GUI extends JFrame {
@@ -14,17 +16,19 @@ public class GUI extends JFrame {
     private String color;
     private boolean isBot; 
 
+    // Cache to store images in memory so we don't reload from disk every move
+    private Map<String, ImageIcon> imageCache = new HashMap<>();
+
     public GUI(ChessBoard board, NetworkManager nm, boolean isWhite, boolean isBot) {
         this.board = board;
         this.nm = nm;
         this.isBot = isBot; 
         this.myTurn = isWhite;
-        if(isWhite) {
-        	this.color = "White";
-        } else {
-        	this.color = "Black";
-        }
+        this.color = isWhite ? "White" : "Black";
         
+        // Load images into RAM once at startup
+        preloadAllImages();
+
         squares = new JButton[8][8];
         setTitle("CheckMate - " + (isWhite ? "White" : "Black"));
         setSize(600, 600);
@@ -41,20 +45,28 @@ public class GUI extends JFrame {
         setVisible(true);
     }
 
+    private void preloadAllImages() {
+        String[] colors = {"black", "white"};
+        String[] pieces = {"Pawn", "Rook", "Knight", "Bishop", "Queen", "King"};
+        for (String c : colors) {
+            for (String p : pieces) {
+                // This matches your specific filename format: blackBishop.png, whitePawn.png, etc.
+                String fileName = c + p + ".png";
+                imageCache.put(fileName, loadAndScaleImage(fileName));
+            }
+        }
+    }
+
     private void drawBoard() {
         for(int rank = 0; rank < 8; rank++) {
             for(int file = 0; file < 8; file++) {
                 JButton square = new JButton();
-                
-                // Logic check: (Rank + File) % 2 determines color
                 Color squareColor = (rank + file) % 2 == 0 ? Color.WHITE : Color.DARK_GRAY;
                 
                 square.setBackground(squareColor);
-                
-                // --- THE FIX FOR THE DISAPPEARING BACKGROUND ---
                 square.setOpaque(true); 
-                square.setContentAreaFilled(true); // Must be true to see the background color
-                square.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1)); // Optional: adds a thin grid line
+                square.setContentAreaFilled(true);
+                square.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 
                 final int r = rank;
                 final int f = file;
@@ -78,8 +90,6 @@ public class GUI extends JFrame {
             Move thisMove = new Move(ChessBoard.getSquare(startRow, startCol), ChessBoard.getSquare(rank, file), color);
             
             if (thisMove.checkValidMove()) {
-                // CRITICAL: The checkValidMove() above sets thisMove.isEnPassant to true 
-                // if it's a valid capture. Now we send that 'true' flag to the friend.
                 if(!isBot) {
                     nm.sendMove(thisMove); 
                 }
@@ -92,12 +102,9 @@ public class GUI extends JFrame {
                     timer.setRepeats(false);
                     timer.start();
                 }
-            } else {
-                System.out.println("Invalid move attempted.");
             }
             
-            squares[startRow][startCol].setBorder(null);
-            squares[startRow][startCol].setBorderPainted(false);
+            squares[startRow][startCol].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
             startRow = -1; startCol = -1;
         }
     }
@@ -121,7 +128,7 @@ public class GUI extends JFrame {
                     SwingUtilities.invokeLater(() -> {
                         applyMoveLocally(incoming);
                         GameStateManager.tickMoveTimer();
-                        myTurn = true; // IT IS NOW YOUR TURN
+                        myTurn = true;
                     });
                 }
             } catch (Exception e) { 
@@ -131,66 +138,46 @@ public class GUI extends JFrame {
     }
 
     private void applyMoveLocally(Move m) {
-        // Execute the logic
         m.executeMove();
-
         updateSquareVisuals();
-     
-        revalidate();
-        repaint();
     }
     
     private void updateSquareVisuals() {
         for (int rank = 0; rank < 8; rank++) {
             for (int file = 0; file < 8; file++) {
-            	//using  ChessBoard.getSquare to be safer
                 Square sq = ChessBoard.getSquare(rank, file);
                 
-                if (sq.getOccupancy()) {// make sure this matches Square.java
+                if (sq.getOccupancy()) {
                     Piece p = sq.getPieceOnSquare();
-                    String fileName = getFileNameForPiece(p); // Extracted to a helper below
-                    
-                    ImageIcon icon = loadAndScaleImage(fileName);
-                    squares[rank][file].setIcon(icon);
-                    squares[rank][file].setText("");//Clear text so Icon is visible
+                    String fileName = getFileNameForPiece(p);
+                    squares[rank][file].setIcon(imageCache.get(fileName));
                 } else {
                     squares[rank][file].setIcon(null);
-                    squares[rank][file].setText("");
                 }
+                squares[rank][file].setText("");
             }
         }
-        // Force the UI to refresh so changes appear immediately
         this.revalidate();
         this.repaint();
     }
 
     private String getFileNameForPiece(Piece p) {
-        if (p.getColor().equalsIgnoreCase("Black")) {
-            if (p instanceof Bishop) return "blackBishop.png";
-            if (p instanceof Knight) return "blackKnight.png";
-            if (p instanceof King)   return "blackKing.png";
-            if (p instanceof Queen)  return "blackQueen.png";
-            if (p instanceof Rook)   return "blackRook.png";
-            if (p instanceof Pawn)   return "blackPawn.png";
-        }
-        return p.getColor() + p.getClass().getSimpleName() + ".png";
+        // Standardizes to "blackPawn.png" or "whitePawn.png"
+        String pieceType = p.getClass().getSimpleName();
+        String pieceColor = p.getColor().substring(0, 1).toLowerCase() + p.getColor().substring(1).toLowerCase();
+        return pieceColor + pieceType + ".png";
     }
+
     private ImageIcon loadAndScaleImage(String path) {
         try {
             File imgFile = new File(path);
-            
-            if (!imgFile.exists()) {
-                // This will tell you EXACTLY where Java is looking
-                System.out.println("DEBUG: Cannot find file at: " + imgFile.getAbsolutePath());
-                return null; 
-            }
+            if (!imgFile.exists()) return null; 
 
             BufferedImage img = ImageIO.read(imgFile);
-            Image scaled = img.getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+            // Scaled to 65x65 for a 600x600 window
+            Image scaled = img.getScaledInstance(65, 65, Image.SCALE_SMOOTH);
             return new ImageIcon(scaled);
         } catch (Exception e) {
-            System.out.println("DEBUG: Error reading file: " + path);
-            e.printStackTrace();
             return null;
         }
     } 
