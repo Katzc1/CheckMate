@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -126,7 +127,45 @@ public class Queen extends Piece {
 
 	@Override
 	public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
-		// TODO Auto-generated method stub
-		return null;
+	    List<Move> moves = new ArrayList<>();
+	    int r = currentSquare.getRank();
+	    int c = currentSquare.getFile();
+
+	    // All 8 directions a Queen can slide: {rowStep, colStep}
+	    int[][] directions = {
+	        {1, 0}, {-1, 0}, {0, 1}, {0, -1}, // Rook-like (Straight)
+	        {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // Bishop-like (Diagonal)
+	    };
+
+	    for (int[] d : directions) {
+	        // Slide in each direction up to 7 squares away
+	        for (int i = 1; i < 8; i++) {
+	            int targetRank = r + (d[0] * i);
+	            int targetFile = c + (d[1] * i);
+
+	            Square target = ChessBoard.getSquare(targetRank, targetFile);
+
+	            // If we hit the edge of the board, stop sliding in this direction
+	            if (target == null) break;
+
+	            try {
+	                if (checkLegalMove(target)) {
+	                    moves.add(new Move(currentSquare, target, this.Color));
+	                }
+	                
+	                // If there's ANY piece on this square, we stop sliding.
+	                // Your checkLegalMove handles if it was a valid capture or an ally block.
+	                if (target.getOccupancy()) {
+	                    break;
+	                }
+	            } catch (IllegalStateException e) {
+	                // If we hit an obstruction or an ally piece, checkLegalMove throws an error.
+	                // We catch it and stop sliding in this direction.
+	                break;
+	            }
+	        }
+	    }
+
+	    return moves;
 	}
 }

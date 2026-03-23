@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -90,7 +91,48 @@ public class Rook extends Piece {
 
 	@Override
 	public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
-		// TODO Auto-generated method stub
-		return null;
+	    List<Move> moves = new ArrayList<>();
+	    int r = currentSquare.getRank();
+	    int c = currentSquare.getFile();
+
+	    // The four straight directions: {rowStep, colStep}
+	    int[][] directions = {
+	        {1, 0},  // Down
+	        {-1, 0}, // Up
+	        {0, 1},  // Right
+	        {0, -1}  // Left
+	    };
+
+	    for (int[] d : directions) {
+	        // A Rook can slide up to 7 squares in any straight line
+	        for (int i = 1; i < 8; i++) {
+	            int targetRank = r + (d[0] * i);
+	            int targetFile = c + (d[1] * i);
+
+	            Square target = ChessBoard.getSquare(targetRank, targetFile);
+
+	            // If we hit the edge of the board, stop sliding
+	            if (target == null) break;
+
+	            try {
+	                // Use your existing logic to validate the move
+	                if (checkLegalMove(target)) {
+	                    moves.add(new Move(currentSquare, target, this.Color));
+	                }
+
+	                // IMPORTANT: If there is ANY piece on this square, the Rook's path is now blocked.
+	                // We stop the loop for this direction.
+	                if (target.getOccupancy()) {
+	                    break;
+	                }
+	            } catch (IllegalStateException e) {
+	                // If checkLegalMove throws an exception (like an ally piece or obstruction),
+	                // we stop sliding in this direction.
+	                break;
+	            }
+	        }
+	    }
+
+	    return moves;
 	}
 }

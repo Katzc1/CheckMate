@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -111,7 +112,39 @@ public class Pawn extends Piece {
 
     @Override
     public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
-        // To be implemented for AI/Bot move generation later
-        return null;
+        List<Move> moves = new ArrayList<>();
+        int r = currentSquare.getRank();
+        int c = currentSquare.getFile();
+        
+        // We use the 'direction' variable you already set in the constructor
+        int[][] potentialOffsets = {
+            {direction, 0},      // One square forward
+            {direction * 2, 0},  // Two squares forward
+            {direction, -1},     // Diagonal capture left
+            {direction, 1}       // Diagonal capture right
+        };
+
+        for (int[] offset : potentialOffsets) {
+            int targetRank = r + offset[0];
+            int targetFile = c + offset[1];
+
+            Square target = ChessBoard.getSquare(targetRank, targetFile);
+
+            // If the square exists on the board
+            if (target != null) {
+                try {
+                    // If your checkLegalMove returns true, it's a valid move for the bot
+                    if (checkLegalMove(target)) {
+                        moves.add(new Move(currentSquare, target, this.Color));
+                    }
+                } catch (IllegalStateException e) {
+                    // We caught a "DEBUG" exception! 
+                    // This means the move was blocked or illegal, so we just skip it.
+                    continue; 
+                }
+            }
+        }
+
+        return moves;
     }
 }
