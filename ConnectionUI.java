@@ -64,7 +64,7 @@ public class ConnectionUI extends JFrame {
         SwingUtilities.invokeLater(() -> {
             this.dispose();
             ChessBoard board = new ChessBoard();
-            new GUI(board, this.nm, isWhite, isBot);
+            GameStateManager.activeGUI = new GUI(board, this.nm, isWhite, isBot);
         });
     }
 }

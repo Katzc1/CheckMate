@@ -181,4 +181,16 @@ public class GUI extends JFrame {
             return null;
         }
     } 
+    
+    public void checkmatePopup(String winnerColor) {
+        // Show the pop-up. This execution pauses here until the user clicks "OK"
+        JOptionPane.showMessageDialog(this, "GAME OVER! " + winnerColor + " Won!",  "Checkmate",  JOptionPane.INFORMATION_MESSAGE);
+        
+        // Stop displaying the game
+        this.setVisible(false); 
+        //Destroy window resources
+        this.dispose();  
+        //Close the app
+        System.exit(0);         
+    }
 }

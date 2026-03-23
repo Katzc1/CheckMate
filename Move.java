@@ -15,20 +15,7 @@ public class Move implements Serializable {
        this.playerColor = playerColor;
    }
   
-   private void checkOpponentCheckmate(String currentMovingColor) {
-       String opponentColor = currentMovingColor.equalsIgnoreCase("White") ? "Black" : "White";
-       Piece[] opponentPieces = opponentColor.equalsIgnoreCase("White") ?
-                                ChessBoard.getWhitePieces() : ChessBoard.getBlackPieces();
-      
-       for (Piece piece : opponentPieces) {
-           if (piece instanceof King) {
-               if (GameStateManager.isCheckmate((King) piece)) {
-                   GameStateManager.handleCheckmate();
-               }
-               return;
-           }
-       }
-   }
+   
    public boolean checkValidMove() {
        Square realStart = ChessBoard.getSquare(startRow, startCol);
        Square realEnd = ChessBoard.getSquare(endRow, endCol);
@@ -161,16 +148,16 @@ public class Move implements Serializable {
            }
            //CHECKMATE CHECK
            String enemyColor = p.getColor().equalsIgnoreCase("White") ? "Black" : "White";
-          
-           //Find the enemy King and check if they are checkmated
-           Piece[] enemyPieces = enemyColor.equalsIgnoreCase("White") ? ChessBoard.getWhitePieces() : ChessBoard.getBlackPieces();
-          
+           Piece[] enemyPieces = enemyColor.equalsIgnoreCase("White") ? 
+                                ChessBoard.getWhitePieces() : ChessBoard.getBlackPieces();
+         
            for (Piece piece : enemyPieces) {
                if (piece instanceof King) {
                    if (GameStateManager.isCheckmate((King) piece)) {
-                       GameStateManager.handleCheckmate();
+                       // Pass p.getColor() because the person who just moved is the winner!
+                       GameStateManager.handleCheckmate(p.getColor()); 
                    }
-                   break;
+                   break; 
                }
            }
        }

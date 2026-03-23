@@ -7,6 +7,7 @@ public class GameStateManager {
 	public static boolean wantsToPassant = false;
 	public static boolean wantsToCastle = false;
 	public static Piece[] castleWith = new Piece[2];
+	public static GUI activeGUI;
 	
 	public static void setPassantEligable(Square s){
 		wherePassant = s;
@@ -226,9 +227,11 @@ public class GameStateManager {
    return true;
 }
 	
-	public static void handleCheckmate() {
-		System.out.println("CHECKMATE! GAME OVER!!!!!");
-		System.exit(0);
+
+	public static void handleCheckmate(String winnerColor) {
+		if (activeGUI != null) {
+            activeGUI.checkmatePopup(winnerColor);
+        }
 	}
 	
 	
