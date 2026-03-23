@@ -1,5 +1,8 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 @SuppressWarnings("serial")
 public class GUI extends JFrame {
@@ -29,6 +32,7 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         drawBoard();
+        updateSquareVisuals();
         
         if(!isBot) {
             startListening();
@@ -38,39 +42,27 @@ public class GUI extends JFrame {
     }
 
     private void drawBoard() {
-        for(Square[] r: ChessBoard.getBoard()) {
-        	for(Square s: r) {
-        		
-        		final int rank = s.getRank();
-                final int file = s.getFile();
-                
+        for(int rank = 0; rank < 8; rank++) {
+            for(int file = 0; file < 8; file++) {
                 JButton square = new JButton();
                 
-                if(s.getOccupancy()) {
-                	square = new JButton(s.getOccupant().getClass().getSimpleName());
-                	if(s.getOccupant().getColor().equals("White")) {
-                		square.setForeground(Color.BLUE);
-                	} else {
-                		square.setForeground(Color.RED);
-                	}
-                } else {
-                	square = new JButton();
-                }
-                
-                //find color
+                // Logic check: (Rank + File) % 2 determines color
                 Color squareColor = (rank + file) % 2 == 0 ? Color.WHITE : Color.DARK_GRAY;
+                
                 square.setBackground(squareColor);
                 
-                //Need these lines to show color properly on mac 
-                square.setOpaque(true);
-                square.setBorderPainted(false);
-
-                //clicks
-                square.addActionListener(e -> handleSquareClick(rank, file));
+                // --- THE FIX FOR THE DISAPPEARING BACKGROUND ---
+                square.setOpaque(true); 
+                square.setContentAreaFilled(true); // Must be true to see the background color
+                square.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1)); // Optional: adds a thin grid line
+                
+                final int r = rank;
+                final int f = file;
+                square.addActionListener(e -> handleSquareClick(r, f));
                 
                 squares[rank][file] = square;
                 add(square);
-        	}
+            }
         }
     }
 
@@ -142,40 +134,64 @@ public class GUI extends JFrame {
         // Execute the logic
         m.executeMove();
 
-        // Sync the entire UI with the Board Data
-        for (int r = 0; r < 8; r++) {
-            for (int c = 0; c < 8; c++) {
-                Square s = ChessBoard.getSquare(r, c);
-                if (s.getOccupancy()) {
-                    squares[r][c].setText(s.getOccupant().getClass().getSimpleName());
-                    if (s.getOccupant().getColor().equalsIgnoreCase("White")) {
-                        squares[r][c].setForeground(Color.BLUE);
-                    } else {
-                        squares[r][c].setForeground(Color.RED);
-                    }
-                } else {
-                    squares[r][c].setText("");
-                }
-            }
-        }
-        
+        updateSquareVisuals();
+     
         revalidate();
         repaint();
     }
     
     private void updateSquareVisuals() {
-        for (int r = 1; r < 9; r++) {
-            for (int c = 1; c < 9; c++) {
-                Square sq = ChessBoard.getSquare(r, c);
-                if (sq.isOccupied) {
+        for (int rank = 0; rank < 8; rank++) {
+            for (int file = 0; file < 8; file++) {
+            	//using  ChessBoard.getSquare to be safer
+                Square sq = ChessBoard.getSquare(rank, file);
+                
+                if (sq.getOccupancy()) {// make sure this matches Square.java
                     Piece p = sq.getPieceOnSquare();
-                    // Assumes images are named like "WhitePawn.png"
-                    String imgName = p.getColor() + p.getClass().getSimpleName() + ".png";
-                    squares[r][c].setIcon(new ImageIcon("res/" + imgName));
+                    String fileName = getFileNameForPiece(p); // Extracted to a helper below
+                    
+                    ImageIcon icon = loadAndScaleImage(fileName);
+                    squares[rank][file].setIcon(icon);
+                    squares[rank][file].setText("");//Clear text so Icon is visible
                 } else {
-                    squares[r][c].setIcon(null);
+                    squares[rank][file].setIcon(null);
+                    squares[rank][file].setText("");
                 }
             }
         }
+        // Force the UI to refresh so changes appear immediately
+        this.revalidate();
+        this.repaint();
     }
+
+    private String getFileNameForPiece(Piece p) {
+        if (p.getColor().equalsIgnoreCase("Black")) {
+            if (p instanceof Bishop) return "blackBishop.png";
+            if (p instanceof Knight) return "blackKnight.png";
+            if (p instanceof King)   return "blackKing.png";
+            if (p instanceof Queen)  return "blackQueen.png";
+            if (p instanceof Rook)   return "blackRook.png";
+            if (p instanceof Pawn)   return "blackPawn.png";
+        }
+        return p.getColor() + p.getClass().getSimpleName() + ".png";
+    }
+    private ImageIcon loadAndScaleImage(String path) {
+        try {
+            File imgFile = new File(path);
+            
+            if (!imgFile.exists()) {
+                // This will tell you EXACTLY where Java is looking
+                System.out.println("DEBUG: Cannot find file at: " + imgFile.getAbsolutePath());
+                return null; 
+            }
+
+            BufferedImage img = ImageIO.read(imgFile);
+            Image scaled = img.getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error reading file: " + path);
+            e.printStackTrace();
+            return null;
+        }
+    } 
 }

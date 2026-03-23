@@ -1,17 +1,13 @@
 import java.util.ArrayList;
 import java.util.List;
-
 @SuppressWarnings("serial")
 public class Queen extends Piece {
-
 	public Queen(String col, Square pos) {
 		super(col, 8, pos);
 	}
-
 	//Borrowed from Rook
 	public boolean isPathClear(Square destination) {
 		int direction;
-
 		//In the case that the rook is moving along the same RANK:
 		if (Location.sameRank(destination)) {
 			//Find if the rook is moving left (1) or right (-1)
@@ -22,15 +18,14 @@ public class Queen extends Piece {
 				//Otherwise the rook is moving to the right
 				direction = 1;
 			}
-			//Now we start checking all the squares in between the location and destination using direction 
+			//Now we start checking all the squares in between the location and destination using direction
 			//(AFTER the current location and BEFORE the destination since they don't matter)
-			for (int i = (Location.getFile() + direction); i < destination.getFile(); i += direction) {
-				if (ChessBoard.getSquare(Location.getRank(), i).getOccupancy()) {
+			for (int i = 1; i < Location.getFileDistance(destination); i++) {
+				if (ChessBoard.getSquare(Location.getRank(), (Location.getFile() + direction*i)).getOccupancy()) {
 					throw new IllegalStateException("DEBUG: Target square must not be obstructed by other pieces!");
 				}
 			}
 		}
-
 		//In the case that the rook is moving along the same FILE:
 		if (Location.sameFile(destination)) {
 			//Find if the rook is moving up (1) or down (-1)
@@ -41,18 +36,16 @@ public class Queen extends Piece {
 				//Otherwise the rook is moving down
 				direction = 1;
 			}
-
-			//Now we start checking all the squares in between the location and destination using direction 
+			//Now we start checking all the squares in between the location and destination using direction
 			//(AFTER the current location and BEFORE the destination since they don't matter)
-			for (int i = (Location.getRank() + direction); i < destination.getRank(); i += direction) {
-				if (ChessBoard.getSquare(i, Location.getFile()).getOccupancy()) {
-					throw new IllegalStateException("DEBUG: Horizontal path blocked!");
+			for (int i = 1; i < Location.getRankDistance(destination); i++) {
+				if (ChessBoard.getSquare((Location.getRank() + direction*i), Location.getFile()).getOccupancy()) {
+					throw new IllegalStateException("DEBUG: Target square must not be obstructed by other pieces!");
 				}
 			}
 		}
 		return true;
 	}
-
 	//Borrowed from Bishop
 	public boolean isDiagonalPathClear(Square destination) {
 		//Determine the direction of the movement ((-1,-1) is up left, (-1,1) is up right, (1,1) is down right, (1,-1) is down left)
@@ -67,11 +60,9 @@ public class Queen extends Piece {
 		} else {
 			fileStep = -1;
 		}
-
 		//Start checking from the first square after the current location
 		int checkRank = Location.getRank() + rankStep;
 		int checkFile = Location.getFile() + fileStep;
-
 		// Walk the diagonal until we hit the destination
 		while (checkRank != destination.getRank() && checkFile != destination.getFile()) {
 			if (ChessBoard.getBoard()[checkRank][checkFile].getOccupancy()) {
@@ -82,30 +73,24 @@ public class Queen extends Piece {
 		}
 		return true;
 	}
-
 	//Override just saying "this is the child implementing the abstract method"
 	@Override
 	public boolean checkLegalMove(Square destination) {
-
 		//Destination Square must not be occupied by a piece of the same color
 		if (destination.isOccupied && destination.getOccupant().getColor() == this.Color) {
 			throw new IllegalStateException("DEBUG: Target square is occupied by an ally piece!");
 		}
-
 		//Destination Square must not be the same as the current Square
 		if (Location.equals(destination) || this.Location.getTotalDistance(destination) == 0) {
 			throw new IllegalStateException("DEBUG: Target square cannot be the same as starting square!");
 		}
-
 		// QUEEN SPECIFC
-
 		//The destination must not be a knight move away
 		if (((Location.getRankDistance(destination) == 2 && Location.getFileDistance(destination) == 1)
 				|| (Location.getRankDistance(destination) == 1 && Location.getFileDistance(destination) == 2))) {
 			throw new IllegalStateException("DEBUG: Target square cannot be a knight move away!");
 		}
-
-		//There cannot be any pieces in the way 
+		//There cannot be any pieces in the way
 		//(Horizontal)
 		if (Location.sameRank(destination) || Location.sameFile(destination)) {
 			//Only call if there is actually a path (aka its not a 1 square move
@@ -114,17 +99,18 @@ public class Queen extends Piece {
 					throw new IllegalStateException("DEBUG: Target square must not be horizontally obstructed by other pieces!");
 				}
 			}
-		}
-		//(Diagonal)
-		if (Location.sameDiagonal(destination)) {
+		} else if (Location.sameDiagonal(destination)) {
+			//(Diagonal)
 			if (!isDiagonalPathClear(destination)) {
 				throw new IllegalStateException("DEBUG: Target square cannot be diagonally obstructed by other pieces!");
 			}
+		} else {
+			throw new IllegalStateException("DEBUG: Target square must be either horizontally or diagonally aligned!");
 		}
-
+		
+		
 		return true;
 	}
-
 	@Override
 	public List<Move> getValidMoves(ChessBoard board, Square currentSquare) {
 	    List<Move> moves = new ArrayList<>();
